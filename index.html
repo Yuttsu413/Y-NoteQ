@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Y-NoteQ - 単語暗記管理アプリ</title>
     
-    <!-- 7. Google Fonts & FontAwesome CDN -->
+    <!-- Google Fonts & FontAwesome CDN -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -15,9 +15,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        /* -------------------------------------------------------------------------- */
-        /* 2, 7, 8. デザイン基本変数 (メインカラー: #F2CF00系統, フォント設定, テーマ)  */
-        /* -------------------------------------------------------------------------- */
         @font-face {
             font-family: 'CenturyGothicBold';
             src: local('Century Gothic Bold'), local('CenturyGothic-Bold');
@@ -30,7 +27,6 @@
             --primary-hover: #d1b200;
             --primary-light: #fff8d6;
             
-            /* レベル別カラー */
             --lvl-0: #888888;
             --lvl-0-text: #ffffff;
             --lvl-1: #2196F3;
@@ -41,7 +37,6 @@
             --lvl-5: #F44336;
             --lvl-6: #9C27B0;
 
-            /* デフォルト：ライトモード変数 */
             --bg-color: #f4f6f9;
             --card-bg: #ffffff;
             --text-color: #2c3e50;
@@ -51,9 +46,6 @@
             --input-bg: #f8fafc;
         }
 
-        /* -------------------------------------------------------------------------- */
-        /* 全体構造・リセット・レスポンシブスタイル                                    */
-        /* -------------------------------------------------------------------------- */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -70,7 +62,6 @@
             min-height: 100vh;
         }
 
-        /* 3, 24. ヘッダー */
         header {
             background-color: var(--header-bg);
             border-bottom: 1px solid var(--border-color);
@@ -138,7 +129,6 @@
             accent-color: var(--primary-color);
         }
 
-        /* 27. アカウントアイコン・メニュー */
         .account-dropdown {
             position: relative;
         }
@@ -196,7 +186,6 @@
             color: #121824;
         }
 
-        /* 35. タブナビゲーション */
         .tabs-container {
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
@@ -235,7 +224,6 @@
             display: none;
         }
 
-        /* メインコンテンツ枠 */
         main {
             flex: 1;
             padding: 20px;
@@ -244,7 +232,6 @@
             margin: 0 auto;
         }
 
-        /* 3. フッター */
         footer {
             background-color: var(--header-bg);
             border-top: 1px solid var(--border-color);
@@ -255,9 +242,6 @@
             margin-top: auto;
         }
 
-        /* -------------------------------------------------------------------------- */
-        /* コンポーネント・カード・フォーム基本スタイル                                */
-        /* -------------------------------------------------------------------------- */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -325,9 +309,6 @@
             border-color: var(--primary-color);
         }
 
-        /* -------------------------------------------------------------------------- */
-        /* 11-23. ログイン・新規登録 画面スタイル (16. 近代感のあるグラデーション背景) */
-        /* -------------------------------------------------------------------------- */
         .auth-container {
             min-height: 100vh;
             display: flex;
@@ -366,9 +347,6 @@
             gap: 10px;
         }
 
-        /* -------------------------------------------------------------------------- */
-        /* 28-33. フォルダ・単語帳（ホーム画面）                                      */
-        /* -------------------------------------------------------------------------- */
         .folder-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -423,9 +401,6 @@
             font-size: 0.9rem;
         }
 
-        /* -------------------------------------------------------------------------- */
-        /* 44-56. 「単語一覧」タブ・アナリティクス & 単語表                           */
-        /* -------------------------------------------------------------------------- */
         .analytics-bar {
             height: 28px;
             border-radius: 14px;
@@ -455,13 +430,6 @@
             gap: 5px;
         }
 
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-        }
-
-        /* レベル毎の配色クラス */
         .bg-lvl-0 { background-color: var(--lvl-0); color: var(--lvl-0-text); border: 1px solid var(--border-color); }
         .bg-lvl-1 { background-color: var(--lvl-1); color: white; }
         .bg-lvl-2 { background-color: var(--lvl-2); color: white; }
@@ -507,7 +475,6 @@
             text-align: center;
         }
 
-        /* Level一括選択ボタン群のスタイル */
         .lvl-btn-group {
             display: inline-flex;
             gap: 4px;
@@ -535,7 +502,6 @@
             box-shadow: 0 2px 4px var(--shadow-color);
         }
 
-        /* テスト設定用モダンチップ選択 */
         .chip-group {
             display: flex;
             flex-wrap: wrap;
@@ -567,7 +533,6 @@
             border-color: var(--primary-hover);
         }
 
-        /* モーダル表示 */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -600,7 +565,6 @@
             cursor: pointer;
         }
 
-        /* 35, 80. スマホ対応（下部固定ナビゲーション） */
         @media (max-width: 768px) {
             .desktop-only { display: none !important; }
             .header-nav .nav-text { display: none; }
@@ -627,7 +591,6 @@
                 color: var(--primary-hover);
             }
             body { padding-bottom: 60px; }
-            .test-options { grid-template-columns: 1fr; }
         }
 
         @media (min-width: 769px) {
@@ -637,15 +600,12 @@
 </head>
 <body class="light-mode">
 
-    <!-- ------------------------------------------------------------------------ -->
-    <!-- 11-23. ログイン・新規登録 画面 (Firebase連携用)                           -->
-    <!-- ------------------------------------------------------------------------ -->
+    <!-- 認証画面 (ログイン/新規登録) -->
     <div id="authScreen" class="auth-container">
         <!-- ログインフォーム -->
         <div id="loginCard" class="auth-card">
             <div class="auth-logo">
                 <h1>
-                    <!-- ペンギンロゴ SVG -->
                     <svg viewBox="0 0 100 100" width="38" height="38">
                         <path d="M50 8 C30 8 18 28 18 58 C18 78 32 92 50 92 C68 92 82 78 82 58 C82 28 70 8 50 8 Z" fill="#F2CF00"/>
                         <circle cx="38" cy="36" r="6" fill="#121824"/>
@@ -678,14 +638,14 @@
             </div>
         </div>
 
-        <!-- 17-23. 新規登録フォーム (招待コード照合 -> メール/PW) -->
+        <!-- 新規登録フォーム -->
         <div id="signupCard" class="auth-card" style="display: none;">
             <div class="auth-logo">
                 <h1>Y-NoteQ</h1>
                 <p id="signupStepTitle" style="font-size: 0.9rem; color: #cbd5e1;">新規アカウント作成 (1/2)</p>
             </div>
 
-            <!-- ステップ1: 招待コード認証 (18.) -->
+            <!-- ステップ1: 招待コード認証 -->
             <div id="inviteStep">
                 <div class="form-group">
                     <label><i class="fa-solid fa-key"></i> 招待コードを入力</label>
@@ -695,10 +655,10 @@
                 <button type="button" class="btn btn-primary" onclick="verifyInviteCode()" style="width: 100%;">照合して次へ</button>
             </div>
 
-            <!-- ステップ2: アカウント情報入力 (19-21.) -->
+            <!-- ステップ2: アカウント情報入力 -->
             <form id="signupForm" style="display: none;" onsubmit="handleSignup(event)">
                 <div class="form-group">
-                    <label><i class="fa-solid fa-envelope"></i> メールアドレス (@必須)</label>
+                    <label><i class="fa-solid fa-envelope"></i> メールアドレス</label>
                     <input type="email" id="signupEmail" class="form-control" placeholder="example@mail.com" required>
                 </div>
                 <div class="form-group">
@@ -720,11 +680,8 @@
         </div>
     </div>
 
-    <!-- ------------------------------------------------------------------------ -->
-    <!-- 3, 24-27. アプリ本体 ヘッダー                                             -->
-    <!-- ------------------------------------------------------------------------ -->
+    <!-- アプリ本体 ヘッダー -->
     <header>
-        <!-- 26. ロゴ・ホーム戻り -->
         <a class="header-logo" onclick="switchTab('folder')">
             <svg id="headerLogoSvg" viewBox="0 0 100 100" width="32" height="32">
                 <path d="M50 8 C30 8 18 28 18 58 C18 78 32 92 50 92 C68 92 82 78 82 58 C82 28 70 8 50 8 Z" fill="#F2CF00"/>
@@ -737,35 +694,11 @@
             <span class="header-title">Y-NoteQ</span>
         </a>
 
-        <!-- ヘッダー右側ナビゲーション -->
         <div class="header-nav">
-            <!-- 24. 戻るボタン -->
-            <button class="nav-btn" onclick="goBack()" title="一つ前に戻る">
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
-
-            <!-- 音量調節 -->
-            <div class="volume-control desktop-only" title="音声読上げ音量">
-                <i class="fa-solid fa-volume-high"></i>
-                <input type="range" id="volumeRange" min="0" max="1" step="0.1" value="0.8">
-            </div>
-
-            <!-- 25. 使い方モーダル起動 -->
-            <button class="nav-btn" onclick="openModal('guideModal')">
-                <i class="fa-solid fa-circle-question"></i> <span class="nav-text">使い方</span>
-            </button>
-
-            <!-- 25. パッチノート起動 -->
             <button class="nav-btn" onclick="openModal('patchModal')">
                 <i class="fa-solid fa-code-branch"></i> <span class="nav-text">パッチノート</span>
             </button>
 
-            <!-- 8, 24. ライト/ダークモード切替 -->
-            <button class="nav-btn" onclick="toggleDarkMode()" title="テーマ切替">
-                <i class="fa-solid fa-moon" id="themeIcon"></i>
-            </button>
-
-            <!-- 27. PC版 アカウントアイコン -->
             <div class="account-dropdown desktop-only">
                 <div class="avatar-btn" id="userAvatarBtn" onclick="toggleDropdown('accountMenu')">Y</div>
                 <div class="dropdown-menu" id="accountMenu">
@@ -777,28 +710,22 @@
         </div>
     </header>
 
-    <!-- 37. 開いている単語帳名表示バー -->
     <div id="deckHeaderInfo" class="deck-header-info">
         選択中の単語帳: <span id="currentDeckNameDisplay">未選択</span>
     </div>
 
-    <!-- ------------------------------------------------------------------------ -->
-    /* 34-36. タブナビゲーション                                               */
-    <!-- ------------------------------------------------------------------------ -->
+    <!-- タブナビゲーション -->
     <nav class="tabs-container">
         <button class="tab-btn active" onclick="switchTab('folder')"><i class="fa-solid fa-folder"></i> フォルダー</button>
         <button class="tab-btn" onclick="switchTab('words')"><i class="fa-solid fa-list-check"></i> 単語一覧</button>
         <button class="tab-btn" onclick="switchTab('test')"><i class="fa-solid fa-graduation-cap"></i> テスト</button>
         <button class="tab-btn" onclick="switchTab('edit')"><i class="fa-solid fa-pen-to-square"></i> 編集</button>
-        <button class="tab-btn" onclick="switchTab('share')"><i class="fa-solid fa-share-nodes"></i> 共有</button>
         <button class="tab-btn mobile-only" onclick="switchTab('account')"><i class="fa-solid fa-user"></i> アカウント</button>
     </nav>
 
-    <!-- ------------------------------------------------------------------------ -->
-    /* メインコンテンツ表示エリア                                              */
-    <!-- ------------------------------------------------------------------------ -->
+    <!-- メインコンテンツ -->
     <main>
-        <!-- ==================== 28-33. フォルダー・ホーム タブ ==================== -->
+        <!-- フォルダー タブ -->
         <section id="tab-folder" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2><i class="fa-solid fa-folder-open"></i> フォルダー一覧</h2>
@@ -807,70 +734,13 @@
                 </button>
             </div>
             
-            <div id="folderContainer" class="folder-grid">
-                <!-- JSでフォルダ・単語帳カードを動的描画 -->
-            </div>
+            <div id="folderContainer" class="folder-grid"></div>
         </section>
 
-        <!-- ==================== 44-56. 単語一覧 タブ ==================== -->
+        <!-- 単語一覧 タブ -->
         <section id="tab-words" class="tab-content" style="display: none;">
-            <!-- アナリティクスエリア (44-47.) -->
             <div class="card">
-                <h3><i class="fa-solid fa-chart-pie"></i> 暗記度アナリティクス</h3>
-                <div style="display: flex; gap: 15px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
-                    <div>
-                        <label style="font-size:0.85rem">範囲指定:</label>
-                        <input type="text" id="analyticsRange" class="form-control" placeholder="例: 0001~0005" style="width: 140px; display:inline-block;" onchange="updateAnalytics()">
-                    </div>
-                    <div>
-                        <label style="font-size:0.85rem; cursor:pointer;">
-                            <input type="checkbox" id="analyticsExcludeZero" onchange="updateAnalytics()"> 未実施(Level 0)を除く
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 45. 横棒1本グラフ -->
-                <div class="analytics-bar" id="analyticsProgressBar"></div>
-
-                <!-- 47. 割合・単語数凡例 -->
-                <div class="analytics-legend" id="analyticsLegend"></div>
-            </div>
-
-            <!-- 48-49. 検索フィルター -->
-            <div class="card">
-                <h3><i class="fa-solid fa-filter"></i> 検索フィルター</h3>
-                <div class="filter-grid" style="margin-top: 10px;">
-                    <input type="text" id="filterNo" class="form-control" placeholder="単語No (例: 1~5, 8)">
-                    <input type="text" id="filterWord" class="form-control" placeholder="単語名">
-                    <input type="text" id="filterMeaning" class="form-control" placeholder="意味">
-                    <select id="filterLevel" class="form-control">
-                        <option value="">暗記度 (すべて)</option>
-                        <option value="0">Level 0 (未実施)</option>
-                        <option value="1">Level 1</option>
-                        <option value="2">Level 2</option>
-                        <option value="3">Level 3</option>
-                        <option value="4">Level 4</option>
-                        <option value="5">Level 5</option>
-                        <option value="6">Level 6 (度忘)</option>
-                    </select>
-                    <input type="date" id="filterDate" class="form-control">
-                </div>
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button class="btn btn-secondary" onclick="clearWordFilters()">クリア</button>
-                    <button class="btn btn-primary" onclick="renderWordTable()"><i class="fa-solid fa-magnifying-glass"></i> 検索</button>
-                </div>
-            </div>
-
-            <!-- 50-56. 単語表 & エクスポート -->
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                    <h3><i class="fa-solid fa-table"></i> 単語リスト</h3>
-                    <div>
-                        <button class="btn btn-secondary" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> CSV出力</button>
-                        <button class="btn btn-secondary" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> PDF出力</button>
-                    </div>
-                </div>
-
+                <h3><i class="fa-solid fa-table"></i> 単語リスト</h3>
                 <div class="word-table-wrapper" id="pdfTableTarget">
                     <table class="word-table">
                         <thead>
@@ -880,222 +750,30 @@
                                 <th>意味</th>
                                 <th>実施日</th>
                                 <th>暗記度</th>
-                                <th>操作</th>
                             </tr>
                         </thead>
-                        <tbody id="wordTableBody">
-                            <!-- JSで動的生成 -->
-                        </tbody>
+                        <tbody id="wordTableBody"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- ==================== 57-72. テスト タブ ==================== -->
+        <!-- テスト タブ -->
         <section id="tab-test" class="tab-content" style="display: none;">
-            <!-- 58-68. 小テスト設定画面 (UI改善) -->
-            <div id="testSetupCard" class="card" style="max-width: 750px; margin: 0 auto;">
-                <h3 style="border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; margin-bottom: 20px;">
-                    <i class="fa-solid fa-sliders"></i> 小テストの設定
-                </h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-list-ol"></i> 出題範囲指定 / 特定No指定</label>
-                        <input type="text" id="testRangeInput" class="form-control" placeholder="例: 1~10 または 1,3,5,7">
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-hashtag"></i> 出題数</label>
-                        <input type="number" id="testCountInput" class="form-control" value="10" min="1">
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-arrows-rotate"></i> 出題の向き</label>
-                        <select id="testDirection" class="form-control">
-                            <option value="wordToMeaning">出題: 単語 → 解答: 意味</option>
-                            <option value="meaningToWord">出題: 意味 → 解答: 単語</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-layer-group"></i> 出題形式</label>
-                        <select id="testFormat" class="form-control">
-                            <option value="card">単語カード (自己申告)</option>
-                            <option value="choice">4択問題</option>
-                            <option value="input">入力記述 (厳格採点)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-eye"></i> Level表示</label>
-                        <select id="testShowLevel" class="form-control">
-                            <option value="on">表示ON</option>
-                            <option value="off">表示OFF</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-clock"></i> 制限時間の設定</label>
-                        <select id="testTimerMode" class="form-control">
-                            <option value="none">制限時間なし</option>
-                            <option value="perQuestion">1問ごとに設定(秒)</option>
-                            <option value="total">全問まとめて設定(秒)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 15px;">
-                    <label><i class="fa-solid fa-filter"></i> 出題対象 Level (複数選択可)</label>
-                    <div class="chip-group">
-                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="0" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.0 未実施</label>
-                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="1" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.1</label>
-                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="2" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.2</label>
-                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="3" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.3</label>
-                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="4" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.4</label>
-                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="5" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.5</label>
-                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="6" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.6 度忘</label>
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 12px; margin-top: 25px;">
-                    <button class="btn btn-primary" style="flex:1; padding: 12px;" onclick="startTest()">
-                        <i class="fa-solid fa-play"></i> テスト開始
-                    </button>
-                    <button class="btn btn-secondary" style="padding: 12px 20px;" onclick="exportTestPDF()">
-                        <i class="fa-solid fa-file-pdf"></i> テストPDF印刷
-                    </button>
-                </div>
-            </div>
-
-            <!-- 69-70. テスト進行画面 -->
-            <div id="testRunCard" class="card test-card" style="display: none;">
-                <div class="test-progress">
-                    <span id="testProgressText">第 1 / 10 問 (0%)</span>
-                    <span id="testTimerDisplay" style="color: #ef4444;"><i class="fa-solid fa-clock"></i> --:--</span>
-                </div>
-
-                <div style="text-align: left; font-size: 0.9rem; color: #718096;">
-                    単語No: <span id="runWordNo">0001</span> 
-                    <span id="runWordLvl" class="lvl-badge bg-lvl-1" style="margin-left: 8px;">Lv.1</span>
-                </div>
-
-                <!-- 出題テキスト表示 -->
-                <div class="test-word-display" id="runQuestionDisplay">Apple</div>
-
-                <!-- 形式に応じた解答領域 -->
-                <div id="testAnswerArea"></div>
-
-                <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                    <button class="btn btn-danger" onclick="abortTest()">テストを中断</button>
-                </div>
-            </div>
-
-            <!-- 71-72. テスト結果（リザルト）画面 -->
-            <div id="testResultCard" class="card test-card" style="display: none;">
-                <h2><i class="fa-solid fa-square-poll-vertical"></i> テスト結果</h2>
-                <div style="font-size: 2.5rem; font-weight: bold; color: var(--primary-hover); margin: 20px 0;" id="resultScoreDisplay">
-                    80%
-                </div>
-
-                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="startTest()"><i class="fa-solid fa-rotate-right"></i> もう一度</button>
-                    <button class="btn btn-secondary" onclick="retryWrongOnly()"><i class="fa-solid fa-xmark"></i> 間違えた問題のみ</button>
-                    <button class="btn btn-secondary" onclick="exportResultPDF()"><i class="fa-solid fa-file-pdf"></i> 結果PDF出力</button>
-                    <button class="btn btn-secondary" onclick="finishTest()"><i class="fa-solid fa-check"></i> 終了</button>
-                </div>
-
-                <div style="text-align: left; margin-top: 20px;">
-                    <h4>解答履歴と暗記度変更</h4>
-                    <div id="resultListContainer" style="margin-top: 10px;"></div>
-                </div>
+            <div class="card">
+                <h3>小テスト</h3>
+                <p style="margin-top: 10px;">単語テスト機能</p>
             </div>
         </section>
 
-        <!-- ==================== 73-78. 編集 タブ ==================== -->
+        <!-- 編集 タブ -->
         <section id="tab-edit" class="tab-content" style="display: none;">
-            <!-- 74. 単語追加（手動 & CSVインポート） -->
             <div class="card">
-                <h3><i class="fa-solid fa-plus"></i> 単語の追加</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
-                    <input type="text" id="addWordText" class="form-control" placeholder="単語 (例: apple)">
-                    <input type="text" id="addMeaningText" class="form-control" placeholder="意味 (例: りんご | 果物)">
-                    <select id="addInitialLevel" class="form-control">
-                        <option value="0">初期Level 0</option>
-                        <option value="1">Level 1</option>
-                        <option value="2">Level 2</option>
-                        <option value="3">Level 3</option>
-                        <option value="4">Level 4</option>
-                        <option value="5">Level 5</option>
-                        <option value="6">Level 6</option>
-                    </select>
-                    <button class="btn btn-primary" onclick="addSingleWord()"><i class="fa-solid fa-plus"></i> 追加</button>
-                </div>
-
-                <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
-
-                <h4><i class="fa-solid fa-file-import"></i> CSV / スプレッドシートからインポート</h4>
-                <p style="font-size: 0.85rem; color: #718096; margin-bottom: 10px;">
-                    ※ 1列目:No, 2列目:単語, 3列目:意味, 4列目:暗記度 (2行目から読み込み)
-                </p>
-                <input type="file" id="csvFileInput" accept=".csv" class="form-control" style="max-width: 400px; display:inline-block;">
-                <button class="btn btn-secondary" onclick="importCSV()"><i class="fa-solid fa-upload"></i> インポート実行</button>
-            </div>
-
-            <!-- 78. 一括操作 -->
-            <div class="card">
-                <h3><i class="fa-solid fa-list-check"></i> 単語の一括操作</h3>
-                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap;">
-                    <input type="text" id="batchRangeInput" class="form-control" placeholder="範囲指定 (例: 1~10)" style="width: 180px;">
-                    <button class="btn btn-secondary" onclick="batchResetLevel()"><i class="fa-solid fa-rotate-left"></i> 暗記度リセット(未実施)</button>
-                    <button class="btn btn-danger" onclick="batchDeleteWords()"><i class="fa-solid fa-trash"></i> 一括削除</button>
-                </div>
-            </div>
-
-            <!-- 75. 編集用一覧表 -->
-            <div class="card">
-                <h3>単語の修正・順序変更・削除</h3>
-                <div class="word-table-wrapper" style="margin-top: 10px;">
-                    <table class="word-table">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>単語</th>
-                                <th>意味</th>
-                                <th>Lv</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="editTableBody">
-                            <!-- JSで動的描画 -->
-                        </tbody>
-                    </table>
-                </div>
+                <h3>単語の編集</h3>
             </div>
         </section>
 
-        <!-- ==================== 79. 共有 タブ ==================== -->
-        <section id="tab-share" class="tab-content" style="display: none;">
-            <div class="card">
-                <h2><i class="fa-solid fa-share-nodes"></i> 単語帳の共有・コミュニティ</h2>
-                <p style="margin: 10px 0;">作成した単語帳を共有したり、他ユーザーの単語帳をインポートできます。</p>
-                
-                <div class="folder-grid" style="margin-top: 20px;">
-                    <div class="folder-card" style="border-left-color: #2196F3;">
-                        <h4>TOEIC 頻出英単語 800</h4>
-                        <p style="font-size:0.85rem; color:#718096;">作成者: Official_User</p>
-                        <button class="btn btn-primary" style="margin-top: 10px;" onclick="alert('自分のフォルダーに複製インポートしました')">インポート</button>
-                    </div>
-                    <div class="folder-card" style="border-left-color: #4CAF50;">
-                        <h4>日常英会話表現 100選</h4>
-                        <p style="font-size:0.85rem; color:#718096;">作成者: EnglishMaster</p>
-                        <button class="btn btn-primary" style="margin-top: 10px;" onclick="alert('自分のフォルダーに複製インポートしました')">インポート</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== 80-82. アカウント タブ ==================== -->
+        <!-- アカウント タブ -->
         <section id="tab-account" class="tab-content" style="display: none;">
             <div class="card" style="max-width: 650px; margin: 0 auto;">
                 <div style="text-align: center; margin-bottom: 20px;">
@@ -1103,12 +781,7 @@
                     <h2 id="profileUsername">ユーザーネーム</h2>
                     <p id="profileEmail" style="color: #718096;">user@example.com</p>
                 </div>
-
-                <!-- 81. 過去20回分のテスト履歴 -->
-                <h3><i class="fa-solid fa-clock-rotate-left"></i> 直近のテスト履歴</h3>
-                <ul id="testHistoryList" style="list-style: none; margin-top: 15px;" class="deck-list">
-                    <!-- JSで動的生成 -->
-                </ul>
+                <button class="btn btn-danger" style="width: 100%;" onclick="handleLogout()">ログアウト</button>
             </div>
         </section>
     </main>
@@ -1122,119 +795,69 @@
                 <label>フォルダー名</label>
                 <input type="text" id="newFolderName" class="form-control" placeholder="例: 英語学習">
             </div>
-            <div class="form-group">
-                <label>フォルダーのテーマカラー</label>
-                <input type="color" id="newFolderColor" class="form-control" value="#F2CF00" style="height:40px; padding:2px;">
-            </div>
             <button class="btn btn-primary" onclick="createNewFolder()" style="width:100%;">作成</button>
         </div>
     </div>
 
-    <!-- 25. パッチノートモーダル -->
     <div id="patchModal" class="modal-overlay">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal('patchModal')">&times;</button>
             <h3><i class="fa-solid fa-code-branch"></i> パッチノート</h3>
-            <div style="margin-top: 15px; font-size: 0.9rem;">
-                <details open style="margin-bottom: 10px;">
-                    <summary style="font-weight: bold; cursor: pointer;">Ver 1.0.0 (2026/08/15)</summary>
-                    <p style="padding: 8px;">・Y-NoteQ 正式リリース<br>・7段階暗記度・小テスト・CSVインポート対応</p>
-                </details>
-            </div>
+            <p style="margin-top:10px;">Ver 1.0.0 リリース</p>
         </div>
     </div>
 
-    <!-- 84. バグ報告モーダル -->
-    <div id="bugReportModal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('bugReportModal')">&times;</button>
-            <h3><i class="fa-solid fa-bug"></i> バグ報告・ご意見</h3>
-            <div class="form-group" style="margin-top: 15px;">
-                <textarea class="form-control" rows="4" placeholder="不具合の詳細や改善の要望をご記入ください"></textarea>
-            </div>
-            <button class="btn btn-primary" onclick="alert('ご報告ありがとうございます。'); closeModal('bugReportModal');">送信</button>
-        </div>
-    </div>
-
-    <!-- 新規フォルダ作成モーダル -->
-    <div id="addFolderModal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('addFolderModal')">&times;</button>
-            <h3>新規フォルダー作成</h3>
-            <div class="form-group" style="margin-top: 15px;">
-                <label>フォルダー名</label>
-                <input type="text" id="newFolderName" class="form-control" placeholder="例: 英語学習">
-            </div>
-            <button class="btn btn-primary" onclick="createNewFolder()">作成</button>
-        </div>
-    </div>
-
-    <!-- 3. フッター -->
     <footer>
         <p>&copy; 2026 Y-NoteQ. All Rights Reserved.</p>
     </footer>
 
-    <!-- ------------------------------------------------------------------------ -->
-    /* 12, JSコードおよびFirebase設定                                           */
-    <!-- ------------------------------------------------------------------------ -->
-    <!-- Firebase 10.x SDK CDN -->
+    <!-- Firebase SDK (10.x SDK CDN) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // 有効な招待コードリスト
+        // 1. Firebaseの設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4X91yGIZkHxj3xPOAnc_R5uuCVw0iwtI",
+            authDomain: "y-noteq-a.firebaseapp.com",
+            databaseURL: "https://y-noteq-a-default-rtdb.firebaseio.com",
+            projectId: "y-noteq-a",
+            storageBucket: "y-noteq-a.firebasestorage.app",
+            messagingSenderId: "500955780666",
+            appId: "1:500955780666:web:88ba469096c53525590703",
+            measurementId: "G-SWPW6NYML4"
+        };
+
+        // 2. Firebase初期化
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // アプリデータ定義
         const VALID_INVITE_CODES = ['123456', 'YNOTEQ', 'YNOTE2026', 'YNOTE-GIFT'];
+        let folders = [];
+        let currentDeckId = null;
 
-        /**
-         * ローカルストレージデータの読み込みと初期サンプルのセットアップ
-         */
-        function loadAppLocalData() {
-            const savedFolders = localStorage.getItem('ynoteq_folders');
-            const savedHistory = localStorage.getItem('ynoteq_test_history');
-            
-            if (savedHistory) {
-                testHistory = JSON.parse(savedHistory);
-            }
-
-            if (savedFolders) {
-                folders = JSON.parse(savedFolders);
+        // 3. 認証ビュー切替
+        function switchAuthView(view) {
+            const loginCard = document.getElementById('loginCard');
+            const signupCard = document.getElementById('signupCard');
+            if (view === 'login') {
+                loginCard.style.display = 'block';
+                signupCard.style.display = 'none';
             } else {
-                folders = [
-                    {
-                        id: 'f1',
-                        name: '英単語基本',
-                        color: '#F2CF00',
-                        decks: [
-                            {
-                                id: 'd1',
-                                name: '中学英単語 Level 1',
-                                words: [
-                                    { id: 1, word: 'apple', meaning: 'りんご', level: 1, date: '2026/05/25' },
-                                    { id: 2, word: 'book', meaning: '本', level: 2, date: '2026/05/25' },
-                                    { id: 3, word: 'cat', meaning: '猫', level: 0, date: '' },
-                                    { id: 4, word: 'dog', meaning: '犬', level: 5, date: '2026/05/20' },
-                                    { id: 5, word: 'elephant', meaning: '象', level: 6, date: '2026/05/22' }
-                                ]
-                            }
-                        ]
-                    }
-                ];
-                saveAppLocalData();
-            }
-
-            if (folders.length > 0 && folders[0].decks.length > 0) {
-                currentDeckId = folders[0].decks[0].id;
-                updateDeckNameDisplay();
+                loginCard.style.display = 'none';
+                signupCard.style.display = 'block';
+                document.getElementById('inviteStep').style.display = 'block';
+                document.getElementById('signupForm').style.display = 'none';
+                document.getElementById('signupStepTitle').innerText = '新規アカウント作成 (1/2)';
             }
         }
 
-        function saveAppLocalData() {
-            localStorage.setItem('ynoteq_folders', JSON.stringify(folders));
-            localStorage.setItem('ynoteq_test_history', JSON.stringify(testHistory));
-        }
-
-        // 18. 招待コード照合処理
+        // 招待コード確認
         function verifyInviteCode() {
             const codeInput = document.getElementById('inviteCodeInput').value.trim().toUpperCase();
             if (VALID_INVITE_CODES.includes(codeInput)) {
@@ -1242,16 +865,80 @@
                 document.getElementById('signupForm').style.display = 'block';
                 document.getElementById('signupStepTitle').innerText = 'アカウント情報入力 (2/2)';
             } else {
-                alert('無効な招待コードです。正しく入力してください。');
+                alert('無効な招待コードです。');
             }
         }
 
-        /**
-         * タブ切り替え処理
-         */
-        function switchTab(tabName) {
-            navigationHistory.push(tabName);
+        // 4. ログイン処理
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
 
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert('ログインしました');
+                    document.getElementById('authScreen').style.display = 'none';
+                })
+                .catch((error) => {
+                    console.error("ログインエラー:", error);
+                    alert('ログインエラー: ' + error.message);
+                });
+        }
+
+        // 5. 新規登録処理
+        function handleSignup(event) {
+            event.preventDefault();
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+
+            if (password !== passwordConfirm) {
+                alert('パスワードが一致しません');
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert('アカウント登録が完了しました');
+                    document.getElementById('authScreen').style.display = 'none';
+                })
+                .catch((error) => {
+                    console.error("登録エラー:", error);
+                    alert('登録エラー: ' + error.message);
+                });
+        }
+
+        // 6. ログアウト処理
+        function handleLogout() {
+            auth.signOut().then(() => {
+                alert('ログアウトしました');
+                document.getElementById('authScreen').style.display = 'flex';
+            }).catch((error) => {
+                console.error("ログアウトエラー:", error);
+            });
+        }
+
+        // 7. 認証状態のリアルタイム監視
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('profileEmail').innerText = user.email || 'user@example.com';
+                document.getElementById('profileUsername').innerText = user.email ? user.email.split('@')[0] : 'ユーザー';
+            } else {
+                document.getElementById('authScreen').style.display = 'flex';
+            }
+        });
+
+        // 画面モーダル操作関数
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function toggleDropdown(id) {
+            const menu = document.getElementById(id);
+            menu.classList.toggle('show');
+        }
+
+        function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -1260,273 +947,6 @@
 
             const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabName));
             if (activeBtn) activeBtn.classList.add('active');
-
-            const deckHeader = document.getElementById('deckHeaderInfo');
-            if (tabName !== 'folder') {
-                deckHeader.style.display = 'block';
-                updateDeckNameDisplay();
-            } else {
-                deckHeader.style.display = 'none';
-            }
-
-            if (tabName === 'words') {
-                updateAnalytics();
-                renderWordTable();
-            } else if (tabName === 'edit') {
-                renderEditTable();
-            } else if (tabName === 'account') {
-                renderTestHistory();
-            }
-        }
-
-        /**
-         * 28-33. フォルダー & 単語帳 管理描画
-         */
-        function renderFolders() {
-            const container = document.getElementById('folderContainer');
-            container.innerHTML = '';
-
-            folders.forEach(folder => {
-                const folderColor = folder.color || '#F2CF00';
-                const fEl = document.createElement('div');
-                fEl.className = 'folder-card';
-                fEl.style.borderLeft = `6px solid ${folderColor}`;
-                fEl.innerHTML = `
-                    <div class="folder-header">
-                        <span class="folder-title"><i class="fa-solid fa-folder" style="color:${folderColor}"></i> ${folder.name}</span>
-                        <div>
-                            <button class="nav-btn" onclick="editFolder('${folder.id}')"><i class="fa-solid fa-pen"></i></button>
-                            <button class="nav-btn" onclick="deleteFolder('${folder.id}')"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                    <div class="deck-list">
-                        ${folder.decks.map(deck => `
-                            <div class="deck-item" onclick="selectDeck('${deck.id}')" style="${deck.id === currentDeckId ? 'border: 2px solid var(--primary-color); font-weight:bold;' : ''}">
-                                <span><i class="fa-solid fa-book"></i> ${deck.name} (${deck.words.length}語)</span>
-                                <div>
-                                    <button class="nav-btn" onclick="event.stopPropagation(); editDeckName('${folder.id}', '${deck.id}')"><i class="fa-solid fa-pen"></i></button>
-                                    <button class="nav-btn" onclick="event.stopPropagation(); deleteDeck('${folder.id}', '${deck.id}')"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="addDeckToFolder('${folder.id}')">
-                        <i class="fa-solid fa-plus"></i> 単語帳を追加
-                    </button>
-                `;
-                container.appendChild(fEl);
-            });
-        }
-
-        function createNewFolder() {
-            const name = document.getElementById('newFolderName').value;
-            const color = document.getElementById('newFolderColor').value;
-            if (!name) return;
-            folders.push({
-                id: 'f_' + Date.now(),
-                name: name,
-                color: color,
-                decks: []
-            });
-            saveAppLocalData();
-            renderFolders();
-            closeModal('addFolderModal');
-            document.getElementById('newFolderName').value = '';
-        }
-
-        function editFolder(folderId) {
-            const folder = folders.find(f => f.id === folderId);
-            const newName = prompt('新しいフォルダー名を入力してください:', folder.name);
-            if (newName) {
-                folder.name = newName;
-                saveAppLocalData();
-                renderFolders();
-            }
-        }
-
-        /**
-         * 50-56. 「単語一覧」表の描画 (Levelボタン化)
-         */
-        function renderWordTable() {
-            const deck = getCurrentDeck();
-            const tbody = document.getElementById('wordTableBody');
-            tbody.innerHTML = '';
-
-            if (!deck) return;
-
-            const fNo = document.getElementById('filterNo').value;
-            const fWord = document.getElementById('filterWord').value.toLowerCase();
-            const fMeaning = document.getElementById('filterMeaning').value.toLowerCase();
-            const fLvl = document.getElementById('filterLevel').value;
-            const fDate = document.getElementById('filterDate').value;
-
-            let filteredWords = deck.words.filter(w => {
-                if (fWord && !w.word.toLowerCase().includes(fWord)) return false;
-                if (fMeaning && !w.meaning.toLowerCase().includes(fMeaning)) return false;
-                if (fLvl !== "" && w.level !== parseInt(fLvl)) return false;
-                if (fDate && w.date !== fDate.replace(/-/g, '/')) return false;
-                
-                if (fNo) {
-                    if (fNo.includes('~')) {
-                        const [s, e] = fNo.split('~').map(Number);
-                        if (w.id < s || w.id > e) return false;
-                    } else if (fNo.includes(',')) {
-                        const nos = fNo.split(',').map(Number);
-                        if (!nos.includes(w.id)) return false;
-                    } else if (w.id !== Number(fNo)) {
-                        return false;
-                    }
-                }
-                return true;
-            });
-
-            filteredWords.forEach(w => {
-                const tr = document.createElement('tr');
-                const noFormatted = String(w.id).padStart(4, '0');
-                
-                // 1~6 Level用個別ボタン群の生成
-                let levelButtonsHtml = '<div class="lvl-btn-group">';
-                for (let i = 1; i <= 6; i++) {
-                    const isActive = w.level === i;
-                    levelButtonsHtml += `
-                        <button class="lvl-select-btn bg-lvl-${i} ${isActive ? 'active' : ''}" 
-                                onclick="setWordLevelDirect(${w.id}, ${i})" title="Level ${i}に設定">
-                            ${i}
-                        </button>
-                    `;
-                }
-                levelButtonsHtml += '</div>';
-
-                tr.innerHTML = `
-                    <td>${noFormatted}</td>
-                    <td><strong>${w.word}</strong></td>
-                    <td>${w.meaning}</td>
-                    <td>${w.level === 0 ? '<span class="lvl-badge bg-lvl-0">未実施</span>' : w.date}</td>
-                    <td>${levelButtonsHtml}</td>
-                    <td>
-                        <button class="btn btn-secondary" style="padding:4px 8px;" onclick="showWordDetail('${w.id}')">詳細</button>
-                        <button class="btn btn-secondary" style="padding:4px 8px;" onclick="resetWordLevel('${w.id}')">リセット</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // 指定レベルへの直接設定
-        function setWordLevelDirect(wordId, newLevel) {
-            const deck = getCurrentDeck();
-            const word = deck.words.find(w => w.id === wordId);
-            if (word) {
-                word.level = newLevel;
-                word.date = new Date().toISOString().split('T')[0].replace(/-/g, '/');
-                saveAppLocalData();
-                renderWordTable();
-                updateAnalytics();
-            }
-        }
-
-        // テスト結果および履歴描画関数
-        function showTestResults() {
-            document.getElementById('testRunCard').style.display = 'none';
-            document.getElementById('testResultCard').style.display = 'block';
-
-            const correctCount = currentTestWords.filter(w => w.userCorrect).length;
-            const pct = Math.round((correctCount / currentTestWords.length) * 100);
-            document.getElementById('resultScoreDisplay').innerText = `${pct}% (${correctCount}/${currentTestWords.length})`;
-
-            const currentDeck = getCurrentDeck();
-            // テスト実施記録の更新と保存
-            testHistory.unshift({
-                date: new Date().toLocaleString(),
-                deckName: currentDeck ? currentDeck.name : '単語帳',
-                score: `${pct}%`,
-                count: currentTestWords.length,
-                correct: correctCount
-            });
-            if (testHistory.length > 20) testHistory.pop();
-            saveAppLocalData();
-
-            const listContainer = document.getElementById('resultListContainer');
-            listContainer.innerHTML = '';
-            currentTestWords.forEach(w => {
-                const item = document.createElement('div');
-                item.className = 'deck-item';
-                item.style.marginBottom = '8px';
-                item.innerHTML = `
-                    <div>
-                        <strong>${w.word}</strong> : ${w.meaning}
-                        <span style="margin-left:10px; color:${w.userCorrect ? '#4CAF50':'#F44336'}">
-                            ${w.userCorrect ? '<i class="fa-solid fa-circle-check"></i> 正解' : '<i class="fa-solid fa-circle-xmark"></i> 不正解'}
-                        </span>
-                    </div>
-                    <div>
-                        Level: Lv.${w.prevLevel} → 
-                        <select onchange="updateWordLevelResult('${w.id}', this.value)" class="form-control" style="width: auto; display:inline-block; padding:2px;">
-                            ${[0,1,2,3,4,5,6].map(l => `<option value="${l}" ${w.level === l ? 'selected':''}>Lv.${l}</option>`).join('')}
-                        </select>
-                    </div>
-                `;
-                listContainer.appendChild(item);
-            });
-        }
-
-        function renderTestHistory() {
-            const list = document.getElementById('testHistoryList');
-            list.innerHTML = '';
-
-            if (testHistory.length === 0) {
-                list.innerHTML = '<li style="text-align:center; padding:15px; color:#888;">テスト履歴はまだありません</li>';
-                return;
-            }
-
-            testHistory.forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'deck-item';
-                li.innerHTML = `
-                    <div>
-                        <strong>${item.deckName || '単語帳'}</strong> (${item.count}問)
-                        <div style="font-size:0.75rem; color:#718096;">${item.date}</div>
-                    </div>
-                    <div style="font-weight:bold; font-size:1.1rem; color:var(--primary-hover);">
-                        ${item.score} (${item.correct}/${item.count})
-                    </div>
-                `;
-                list.appendChild(li);
-            });
-        }
-
-        /**
-         * PDF出力機能（一時レンダラーによる崩れ防止対応）
-         */
-        function exportTestPDF() {
-            const deck = getCurrentDeck();
-            if (!deck || deck.words.length === 0) {
-                alert('出力する単語データがありません。');
-                return;
-            }
-
-            const tempDiv = document.createElement('div');
-            tempDiv.style.padding = '20px';
-            tempDiv.style.fontFamily = 'sans-serif';
-            
-            let html = `<h2 style="text-align:center; margin-bottom:20px;">${deck.name} - 小テストプリント</h2><ol style="line-height:2.2;">`;
-            deck.words.forEach(w => {
-                html += `<li style="margin-bottom:12px; font-size:1.1rem;">
-                    <strong>${w.word}</strong> : ________________________________________ (解答)
-                </li>`;
-            });
-            html += '</ol>';
-            tempDiv.innerHTML = html;
-
-            const opt = {
-                margin: 10,
-                filename: `${deck.name}_小テスト.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(tempDiv).save();
         }
     </script>
 </body>
