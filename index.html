@@ -19,8 +19,9 @@
         /* 2, 7, 8. デザイン基本変数 (メインカラー: #F2CF00系統, フォント設定, テーマ)  */
         /* -------------------------------------------------------------------------- */
         @font-face {
-            font-family: 'Futura';
-            src: local('Futura'), local('Futura-Medium'), url('https://fonts.cdnfonts.com/s/16010/FuturaMedium.woff') format('woff');
+            font-family: 'CenturyGothicBold';
+            src: local('Century Gothic Bold'), local('CenturyGothic-Bold');
+            font-weight: bold;
             font-display: swap;
         }
 
@@ -29,9 +30,9 @@
             --primary-hover: #d1b200;
             --primary-light: #fff8d6;
             
-            /* レベル別カラー (43. Levelの色指定) */
-            --lvl-0: #ffffff;
-            --lvl-0-text: #333333;
+            /* レベル別カラー */
+            --lvl-0: #888888;
+            --lvl-0-text: #ffffff;
             --lvl-1: #2196F3;
             --lvl-2: #4CAF50;
             --lvl-3: #FFEB3B;
@@ -50,56 +51,14 @@
             --input-bg: #f8fafc;
         }
 
-        /* 8. ダークモード設定 (OS連動 ＋ `.dark-mode` クラス) */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #121824;
-                --card-bg: #1e293b;
-                --text-color: #f1f5f9;
-                --border-color: #334155;
-                --header-bg: #1e293b;
-                --shadow-color: rgba(0, 0, 0, 0.4);
-                --input-bg: #0f172a;
-                --lvl-0: #334155;
-                --lvl-0-text: #f1f5f9;
-                --lvl-3-text: #1e293b;
-            }
-        }
-
-        body.dark-mode {
-            --bg-color: #121824;
-            --card-bg: #1e293b;
-            --text-color: #f1f5f9;
-            --border-color: #334155;
-            --header-bg: #1e293b;
-            --shadow-color: rgba(0, 0, 0, 0.4);
-            --input-bg: #0f172a;
-            --lvl-0: #334155;
-            --lvl-0-text: #f1f5f9;
-            --lvl-3-text: #1e293b;
-        }
-
-        body.light-mode {
-            --bg-color: #f4f6f9;
-            --card-bg: #ffffff;
-            --text-color: #2c3e50;
-            --border-color: #e2e8f0;
-            --header-bg: #ffffff;
-            --shadow-color: rgba(0, 0, 0, 0.08);
-            --input-bg: #f8fafc;
-            --lvl-0: #ffffff;
-            --lvl-0-text: #333333;
-            --lvl-3-text: #333333;
-        }
-
         /* -------------------------------------------------------------------------- */
-        /* 7, 10. 全体構造・リセット・レスポンシブスタイル                            */
+        /* 全体構造・リセット・レスポンシブスタイル                                    */
         /* -------------------------------------------------------------------------- */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Futura', 'Noto Sans JP', sans-serif;
+            font-family: 'Century Gothic', CenturyGothic, 'CenturyGothicBold', 'Noto Sans JP', sans-serif;
             transition: background-color 0.2s ease, color 0.2s ease;
         }
 
@@ -545,59 +504,67 @@
             border-radius: 12px;
             font-weight: bold;
             font-size: 0.8rem;
-            cursor: pointer;
             text-align: center;
         }
 
-        /* -------------------------------------------------------------------------- */
-        /* 57-72. テスト画面                                                         */
-        /* -------------------------------------------------------------------------- */
-        .test-card {
-            max-width: 650px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .test-progress {
-            display: flex;
-            justify-content: space-between;
+        /* Level一括選択ボタン群のスタイル */
+        .lvl-btn-group {
+            display: inline-flex;
+            gap: 4px;
             align-items: center;
-            margin-bottom: 15px;
-            font-weight: bold;
         }
 
-        .test-word-display {
-            font-size: 2.2rem;
+        .lvl-select-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
             font-weight: bold;
-            margin: 30px 0;
-            min-height: 80px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            opacity: 0.6;
+            transition: all 0.15s ease;
         }
 
-        .test-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
+        .lvl-select-btn:hover, .lvl-select-btn.active {
+            opacity: 1;
+            transform: scale(1.1);
+            box-shadow: 0 2px 4px var(--shadow-color);
         }
 
-        .test-opt-btn {
-            padding: 15px;
+        /* テスト設定用モダンチップ選択 */
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .chip-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
             border: 1px solid var(--border-color);
             background: var(--input-bg);
             color: var(--text-color);
-            border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
-            text-align: left;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .test-opt-btn:hover {
-            border-color: var(--primary-color);
-            background-color: var(--primary-light);
+        .chip-btn input[type="checkbox"] {
+            display: none;
+        }
+
+        .chip-btn.active {
+            background-color: var(--primary-color);
             color: #121824;
+            border-color: var(--primary-hover);
         }
 
         /* モーダル表示 */
@@ -671,19 +638,21 @@
 <body class="light-mode">
 
     <!-- ------------------------------------------------------------------------ -->
-    /* 11-23. ログイン・新規登録 画面 (Firebase連携用)                          */
+    <!-- 11-23. ログイン・新規登録 画面 (Firebase連携用)                           -->
     <!-- ------------------------------------------------------------------------ -->
     <div id="authScreen" class="auth-container">
         <!-- ログインフォーム -->
         <div id="loginCard" class="auth-card">
             <div class="auth-logo">
                 <h1>
-                    <!-- ペンギンロゴ SVGインラインフォールバック -->
-                    <svg viewBox="0 0 100 100" width="36" height="36">
-                        <path d="M50 10 C30 10 20 30 20 60 C20 80 35 90 50 90 C65 90 80 80 80 60 C80 30 70 10 50 10 Z" fill="#F2CF00"/>
-                        <circle cx="40" cy="35" r="5" fill="#121824"/>
-                        <circle cx="60" cy="35" r="5" fill="#121824"/>
-                        <polygon points="50,42 42,50 58,50" fill="#FF9800"/>
+                    <!-- ペンギンロゴ SVG -->
+                    <svg viewBox="0 0 100 100" width="38" height="38">
+                        <path d="M50 8 C30 8 18 28 18 58 C18 78 32 92 50 92 C68 92 82 78 82 58 C82 28 70 8 50 8 Z" fill="#F2CF00"/>
+                        <circle cx="38" cy="36" r="6" fill="#121824"/>
+                        <circle cx="62" cy="36" r="6" fill="#121824"/>
+                        <circle cx="40" cy="34" r="2" fill="#FFFFFF"/>
+                        <circle cx="64" cy="34" r="2" fill="#FFFFFF"/>
+                        <polygon points="50,42 40,52 60,52" fill="#FF9800"/>
                     </svg>
                     Y-NoteQ
                 </h1>
@@ -709,7 +678,7 @@
             </div>
         </div>
 
-        <!-- 17-23. 新規登録フォーム (招待コード -> メール/PW) -->
+        <!-- 17-23. 新規登録フォーム (招待コード照合 -> メール/PW) -->
         <div id="signupCard" class="auth-card" style="display: none;">
             <div class="auth-logo">
                 <h1>Y-NoteQ</h1>
@@ -719,10 +688,11 @@
             <!-- ステップ1: 招待コード認証 (18.) -->
             <div id="inviteStep">
                 <div class="form-group">
-                    <label><i class="fa-solid fa-key"></i> 6桁の招待コードを入力</label>
-                    <input type="text" id="inviteCodeInput" class="form-control" maxlength="6" placeholder="123456">
+                    <label><i class="fa-solid fa-key"></i> 招待コードを入力</label>
+                    <input type="text" id="inviteCodeInput" class="form-control" placeholder="例: 123456" style="text-transform: uppercase;">
+                    <small style="color: #cbd5e1; font-size:0.75rem; display:block; margin-top:4px;">※ 有効な招待コードをお持ちの方のみ登録できます。</small>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="verifyInviteCode()" style="width: 100%;">次へ</button>
+                <button type="button" class="btn btn-primary" onclick="verifyInviteCode()" style="width: 100%;">照合して次へ</button>
             </div>
 
             <!-- ステップ2: アカウント情報入力 (19-21.) -->
@@ -751,17 +721,18 @@
     </div>
 
     <!-- ------------------------------------------------------------------------ -->
-    /* 3, 24-27. アプリ本体 ヘッダー                                           */
+    <!-- 3, 24-27. アプリ本体 ヘッダー                                             -->
     <!-- ------------------------------------------------------------------------ -->
     <header>
         <!-- 26. ロゴ・ホーム戻り -->
         <a class="header-logo" onclick="switchTab('folder')">
-            <!-- テーマに応じたペンギンロゴ (フォールバックSVG) -->
             <svg id="headerLogoSvg" viewBox="0 0 100 100" width="32" height="32">
-                <path d="M50 10 C30 10 20 30 20 60 C20 80 35 90 50 90 C65 90 80 80 80 60 C80 30 70 10 50 10 Z" fill="#F2CF00"/>
-                <circle cx="40" cy="35" r="5" fill="#121824"/>
-                <circle cx="60" cy="35" r="5" fill="#121824"/>
-                <polygon points="50,42 42,50 58,50" fill="#FF9800"/>
+                <path d="M50 8 C30 8 18 28 18 58 C18 78 32 92 50 92 C68 92 82 78 82 58 C82 28 70 8 50 8 Z" fill="#F2CF00"/>
+                <circle cx="38" cy="36" r="6" fill="#121824"/>
+                <circle cx="62" cy="36" r="6" fill="#121824"/>
+                <circle cx="40" cy="34" r="2" fill="#FFFFFF"/>
+                <circle cx="64" cy="34" r="2" fill="#FFFFFF"/>
+                <polygon points="50,42 40,52 60,52" fill="#FF9800"/>
             </svg>
             <span class="header-title">Y-NoteQ</span>
         </a>
@@ -922,82 +893,77 @@
 
         <!-- ==================== 57-72. テスト タブ ==================== -->
         <section id="tab-test" class="tab-content" style="display: none;">
-            <!-- 58-68. 小テスト設定画面 -->
-            <div id="testSetupCard" class="card" style="max-width: 700px; margin: 0 auto;">
-                <h3><i class="fa-solid fa-sliders"></i> 小テストの設定</h3>
+            <!-- 58-68. 小テスト設定画面 (UI改善) -->
+            <div id="testSetupCard" class="card" style="max-width: 750px; margin: 0 auto;">
+                <h3 style="border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; margin-bottom: 20px;">
+                    <i class="fa-solid fa-sliders"></i> 小テストの設定
+                </h3>
                 
-                <div class="form-group" style="margin-top: 15px;">
-                    <label>出題範囲指定 / 特定No指定</label>
-                    <input type="text" id="testRangeInput" class="form-control" placeholder="例: 1~10 または 1,3,5,7">
-                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-list-ol"></i> 出題範囲指定 / 特定No指定</label>
+                        <input type="text" id="testRangeInput" class="form-control" placeholder="例: 1~10 または 1,3,5,7">
+                    </div>
 
-                <div class="form-group">
-                    <label>出題数</label>
-                    <input type="number" id="testCountInput" class="form-control" value="10" min="1">
-                </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-hashtag"></i> 出題数</label>
+                        <input type="number" id="testCountInput" class="form-control" value="10" min="1">
+                    </div>
 
-                <div class="form-group">
-                    <label>出題の向き</label>
-                    <select id="testDirection" class="form-control">
-                        <option value="wordToMeaning">出題: 単語 → 解答: 意味</option>
-                        <option value="meaningToWord">出題: 意味 → 解答: 単語</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-arrows-rotate"></i> 出題の向き</label>
+                        <select id="testDirection" class="form-control">
+                            <option value="wordToMeaning">出題: 単語 → 解答: 意味</option>
+                            <option value="meaningToWord">出題: 意味 → 解答: 単語</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label>採点方式</label>
-                    <select id="testGradingMode" class="form-control">
-                        <option value="instant">毎時採点 (1問ずつ判別)</option>
-                        <option value="end">最後に採点</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-layer-group"></i> 出題形式</label>
+                        <select id="testFormat" class="form-control">
+                            <option value="card">単語カード (自己申告)</option>
+                            <option value="choice">4択問題</option>
+                            <option value="input">入力記述 (厳格採点)</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label>出題対象Level (複数選択)</label>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <label><input type="checkbox" class="test-lvl-chk" value="0" checked> Lv0</label>
-                        <label><input type="checkbox" class="test-lvl-chk" value="1" checked> Lv1</label>
-                        <label><input type="checkbox" class="test-lvl-chk" value="2" checked> Lv2</label>
-                        <label><input type="checkbox" class="test-lvl-chk" value="3" checked> Lv3</label>
-                        <label><input type="checkbox" class="test-lvl-chk" value="4" checked> Lv4</label>
-                        <label><input type="checkbox" class="test-lvl-chk" value="5" checked> Lv5</label>
-                        <label><input type="checkbox" class="test-lvl-chk" value="6" checked> Lv6</label>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-eye"></i> Level表示</label>
+                        <select id="testShowLevel" class="form-control">
+                            <option value="on">表示ON</option>
+                            <option value="off">表示OFF</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-clock"></i> 制限時間の設定</label>
+                        <select id="testTimerMode" class="form-control">
+                            <option value="none">制限時間なし</option>
+                            <option value="perQuestion">1問ごとに設定(秒)</option>
+                            <option value="total">全問まとめて設定(秒)</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>出題形式</label>
-                    <select id="testFormat" class="form-control">
-                        <option value="card">単語カード (自己申告)</option>
-                        <option value="choice">4択問題</option>
-                        <option value="input">入力記述 (厳格採点)</option>
-                    </select>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label><i class="fa-solid fa-filter"></i> 出題対象 Level (複数選択可)</label>
+                    <div class="chip-group">
+                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="0" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.0 未実施</label>
+                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="1" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.1</label>
+                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="2" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.2</label>
+                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="3" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.3</label>
+                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="4" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.4</label>
+                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="5" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.5</label>
+                        <label class="chip-btn active"><input type="checkbox" class="test-lvl-chk" value="6" checked onchange="this.parentElement.classList.toggle('active', this.checked)"> Lv.6 度忘</label>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Level表示</label>
-                    <select id="testShowLevel" class="form-control">
-                        <option value="on">表示ON</option>
-                        <option value="off">表示OFF</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>制限時間の設定</label>
-                    <select id="testTimerMode" class="form-control" onchange="toggleTimerInput()">
-                        <option value="none">制限時間なし</option>
-                        <option value="perQuestion">1問ごとに設定(秒)</option>
-                        <option value="total">全問まとめて設定(秒)</option>
-                    </select>
-                    <input type="number" id="testTimerValue" class="form-control" placeholder="秒数を入力" style="display:none; margin-top: 8px;">
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="btn btn-primary" style="flex:1;" onclick="startTest()">
-                        <i class="fa-solid fa-play"></i> 設定した条件でテスト開始
+                <div style="display: flex; gap: 12px; margin-top: 25px;">
+                    <button class="btn btn-primary" style="flex:1; padding: 12px;" onclick="startTest()">
+                        <i class="fa-solid fa-play"></i> テスト開始
                     </button>
-                    <button class="btn btn-secondary" onclick="exportTestPDF()">
-                        <i class="fa-solid fa-file-pdf"></i> テストをPDFに出力
+                    <button class="btn btn-secondary" style="padding: 12px 20px;" onclick="exportTestPDF()">
+                        <i class="fa-solid fa-file-pdf"></i> テストPDF印刷
                     </button>
                 </div>
             </div>
@@ -1131,38 +1097,36 @@
 
         <!-- ==================== 80-82. アカウント タブ ==================== -->
         <section id="tab-account" class="tab-content" style="display: none;">
-            <div class="card" style="max-width: 600px; margin: 0 auto;">
+            <div class="card" style="max-width: 650px; margin: 0 auto;">
                 <div style="text-align: center; margin-bottom: 20px;">
                     <div class="avatar-btn" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto 10px;">Y</div>
                     <h2 id="profileUsername">ユーザーネーム</h2>
                     <p id="profileEmail" style="color: #718096;">user@example.com</p>
-                    <div style="margin-top: 10px;">
-                        <span class="lvl-badge bg-lvl-2">個人Rank: Lv.12 (学習者)</span>
-                    </div>
                 </div>
 
                 <!-- 81. 過去20回分のテスト履歴 -->
-                <h3><i class="fa-solid fa-history"></i> 過去のテスト記録 (直近20回)</h3>
-                <ul id="testHistoryList" style="list-style: none; margin-top: 10px;" class="deck-list">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> 直近のテスト履歴</h3>
+                <ul id="testHistoryList" style="list-style: none; margin-top: 15px;" class="deck-list">
                     <!-- JSで動的生成 -->
                 </ul>
             </div>
         </section>
     </main>
 
-    <!-- ------------------------------------------------------------------------ -->
-    /* モーダルダイアログ群 (使い方, パッチノート, バグ報告, フォルダ作成など)    */
-    <!-- ------------------------------------------------------------------------ -->
-    <!-- 25. 使い方モーダル -->
-    <div id="guideModal" class="modal-overlay">
+    <!-- モーダルダイアログ群 -->
+    <div id="addFolderModal" class="modal-overlay">
         <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('guideModal')">&times;</button>
-            <h3><i class="fa-solid fa-book"></i> Y-NoteQ の使い方</h3>
-            <div style="margin-top: 15px; font-size:0.95rem; line-height: 1.6;">
-                <p><strong>[フォルダーと単語帳]</strong><br>フォルダー内に単語帳を作成して管理します。</p>
-                <p><strong>[暗記度の7段階]</strong><br>0:未実施, 1~5:覚えている度合い, 6:度忘。テスト結果に応じて自動昇格・降格します。</p>
-                <p><strong>[小テスト]</strong><br>単語カード・4択・記述から選んで記憶を定着させましょう。</p>
+            <button class="close-modal" onclick="closeModal('addFolderModal')">&times;</button>
+            <h3>新規フォルダー作成</h3>
+            <div class="form-group" style="margin-top: 15px;">
+                <label>フォルダー名</label>
+                <input type="text" id="newFolderName" class="form-control" placeholder="例: 英語学習">
             </div>
+            <div class="form-group">
+                <label>フォルダーのテーマカラー</label>
+                <input type="color" id="newFolderColor" class="form-control" value="#F2CF00" style="height:40px; padding:2px;">
+            </div>
+            <button class="btn btn-primary" onclick="createNewFolder()" style="width:100%;">作成</button>
         </div>
     </div>
 
@@ -1219,79 +1183,28 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        /**
-         * 12. Firebase API設定情報組み込み
-         */
-        const firebaseConfig = {
-            apiKey: "AIzaSyC4X91yGIZkHxj3xPOAnc_R5uuCVw0iwtI",
-            authDomain: "y-noteq-a.firebaseapp.com",
-            databaseURL: "https://y-noteq-a-default-rtdb.firebaseio.com",
-            projectId: "y-noteq-a",
-            storageBucket: "y-noteq-a.firebasestorage.app",
-            messagingSenderId: "500955780666",
-            appId: "1:500955780666:web:88ba469096c53525590703",
-            measurementId: "G-SWPW6NYML4"
-        };
-
-        // Firebase初期化 (構成チェック付き)
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        /**
-         * アプリ全体のステート管理変数
-         */
-        let currentUser = null;
-        let folders = [];           // フォルダ・単語帳のデータ配列
-        let currentDeckId = null;   // 現在選択中の単語帳ID
-        let currentTestWords = [];  // テスト実施中ワードリスト
-        let currentTestIndex = 0;   // テスト進行中インデックス
-        let testTimer = null;       // タイマーインスタンス
-        let testHistory = [];       // テスト実施記録履歴
-        let navigationHistory = []; // 操作履歴 (24. 戻るボタン用)
-
-        /**
-         * 9. 初期化関数 (ページの読み込み完了時に自動実行)
-         */
-        window.addEventListener('DOMContentLoaded', () => {
-            // 初期データ (ローカルストレージまたはダミーデータ構造)
-            loadAppLocalData();
-            
-            // テーマ設定の初期化 (8. OS設定連動)
-            initTheme();
-
-            // Firebase 認証状態の監視
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    document.getElementById('authScreen').style.display = 'none';
-                    document.getElementById('profileEmail').innerText = user.email;
-                    document.getElementById('profileUsername').innerText = user.email.split('@')[0];
-                    document.getElementById('userAvatarBtn').innerText = user.email.charAt(0).toUpperCase();
-                } else {
-                    document.getElementById('authScreen').style.display = 'flex';
-                }
-            });
-
-            // 初期フォルダ描画
-            renderFolders();
-        });
+        // 有効な招待コードリスト
+        const VALID_INVITE_CODES = ['123456', 'YNOTEQ', 'YNOTE2026', 'YNOTE-GIFT'];
 
         /**
          * ローカルストレージデータの読み込みと初期サンプルのセットアップ
          */
         function loadAppLocalData() {
             const savedFolders = localStorage.getItem('ynoteq_folders');
+            const savedHistory = localStorage.getItem('ynoteq_test_history');
+            
+            if (savedHistory) {
+                testHistory = JSON.parse(savedHistory);
+            }
+
             if (savedFolders) {
                 folders = JSON.parse(savedFolders);
             } else {
-                // サンプルフォルダ・単語帳データの自動生成 (28-30.)
                 folders = [
                     {
                         id: 'f1',
                         name: '英単語基本',
+                        color: '#F2CF00',
                         decks: [
                             {
                                 id: 'd1',
@@ -1310,7 +1223,6 @@
                 saveAppLocalData();
             }
 
-            // 初期選択単語帳のセット
             if (folders.length > 0 && folders[0].decks.length > 0) {
                 currentDeckId = folders[0].decks[0].id;
                 updateDeckNameDisplay();
@@ -1319,97 +1231,25 @@
 
         function saveAppLocalData() {
             localStorage.setItem('ynoteq_folders', JSON.stringify(folders));
+            localStorage.setItem('ynoteq_test_history', JSON.stringify(testHistory));
         }
 
-        /**
-         * 8, 24. ライト/ダークモード切り替え
-         */
-        function initTheme() {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (prefersDark) {
-                document.body.classList.add('dark-mode');
-                document.getElementById('themeIcon').className = 'fa-solid fa-sun';
-            }
-        }
-
-        function toggleDarkMode() {
-            if (document.body.classList.contains('dark-mode')) {
-                document.body.classList.remove('dark-mode');
-                document.body.classList.add('light-mode');
-                document.getElementById('themeIcon').className = 'fa-solid fa-moon';
-            } else {
-                document.body.classList.remove('light-mode');
-                document.body.classList.add('dark-mode');
-                document.getElementById('themeIcon').className = 'fa-solid fa-sun';
-            }
-        }
-
-        /**
-         * 11-23. Firebase ログイン & 新規登録 処理
-         */
-        function switchAuthView(view) {
-            if (view === 'invite') {
-                document.getElementById('loginCard').style.display = 'none';
-                document.getElementById('signupCard').style.display = 'block';
-                document.getElementById('inviteStep').style.display = 'block';
-                document.getElementById('signupForm').style.display = 'none';
-            } else {
-                document.getElementById('loginCard').style.display = 'block';
-                document.getElementById('signupCard').style.display = 'none';
-            }
-        }
-
-        // 18. 招待コード6桁認証
+        // 18. 招待コード照合処理
         function verifyInviteCode() {
-            const code = document.getElementById('inviteCodeInput').value;
-            if (code.length === 6 && /^\d+$/.test(code)) {
+            const codeInput = document.getElementById('inviteCodeInput').value.trim().toUpperCase();
+            if (VALID_INVITE_CODES.includes(codeInput)) {
                 document.getElementById('inviteStep').style.display = 'none';
                 document.getElementById('signupForm').style.display = 'block';
                 document.getElementById('signupStepTitle').innerText = 'アカウント情報入力 (2/2)';
             } else {
-                alert('有効な6桁の数字の招待コードを入力してください。');
+                alert('無効な招待コードです。正しく入力してください。');
             }
-        }
-
-        // 13. ログイン処理
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            auth.signInWithEmailAndPassword(email, password)
-                .catch(err => alert('ログインエラー: ' + err.message));
-        }
-
-        // 19-21. 新規登録処理
-        function handleSignup(e) {
-            e.preventDefault();
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const confirm = document.getElementById('signupPasswordConfirm').value;
-
-            if (password !== confirm) {
-                alert('パスワードの入力が一致しません。');
-                return;
-            }
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(() => {
-                    alert('登録が完了しました。'); // 23.
-                    switchAuthView('login');
-                })
-                .catch(err => alert('登録エラー: ' + err.message));
-        }
-
-        function handleLogout() {
-            auth.signOut();
         }
 
         /**
-         * 34-37. タブ切り替え処理
+         * タブ切り替え処理
          */
         function switchTab(tabName) {
-            // 操作履歴への追加 (24. 戻る機能用)
             navigationHistory.push(tabName);
 
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
@@ -1418,11 +1258,9 @@
             const targetTab = document.getElementById(`tab-${tabName}`);
             if (targetTab) targetTab.style.display = 'block';
 
-            // 対応するボタンをアクティブ化
             const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabName));
             if (activeBtn) activeBtn.classList.add('active');
 
-            // 37. 単語帳ヘッダー名 表示切り替え
             const deckHeader = document.getElementById('deckHeaderInfo');
             if (tabName !== 'folder') {
                 deckHeader.style.display = 'block';
@@ -1431,36 +1269,14 @@
                 deckHeader.style.display = 'none';
             }
 
-            // タブ特有の初期描画関数呼び出し
             if (tabName === 'words') {
                 updateAnalytics();
                 renderWordTable();
             } else if (tabName === 'edit') {
                 renderEditTable();
+            } else if (tabName === 'account') {
+                renderTestHistory();
             }
-        }
-
-        // 24. 一つ前の操作に戻る
-        function goBack() {
-            if (navigationHistory.length > 1) {
-                navigationHistory.pop(); // 現在の画面を削除
-                const previousTab = navigationHistory.pop();
-                switchTab(previousTab);
-            }
-        }
-
-        function updateDeckNameDisplay() {
-            const currentDeck = getCurrentDeck();
-            document.getElementById('currentDeckNameDisplay').innerText = currentDeck ? currentDeck.name : '未選択';
-        }
-
-        function getCurrentDeck() {
-            for (let f of folders) {
-                for (let d of f.decks) {
-                    if (d.id === currentDeckId) return d;
-                }
-            }
-            return null;
         }
 
         /**
@@ -1471,19 +1287,21 @@
             container.innerHTML = '';
 
             folders.forEach(folder => {
+                const folderColor = folder.color || '#F2CF00';
                 const fEl = document.createElement('div');
                 fEl.className = 'folder-card';
+                fEl.style.borderLeft = `6px solid ${folderColor}`;
                 fEl.innerHTML = `
                     <div class="folder-header">
-                        <span class="folder-title"><i class="fa-solid fa-folder" style="color:var(--primary-color)"></i> ${folder.name}</span>
+                        <span class="folder-title"><i class="fa-solid fa-folder" style="color:${folderColor}"></i> ${folder.name}</span>
                         <div>
-                            <button class="nav-btn" onclick="editFolderName('${folder.id}')"><i class="fa-solid fa-pen"></i></button>
+                            <button class="nav-btn" onclick="editFolder('${folder.id}')"><i class="fa-solid fa-pen"></i></button>
                             <button class="nav-btn" onclick="deleteFolder('${folder.id}')"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                     <div class="deck-list">
                         ${folder.decks.map(deck => `
-                            <div class="deck-item" onclick="selectDeck('${deck.id}')" style="${deck.id === currentDeckId ? 'border: 2px solid var(--primary-color);' : ''}">
+                            <div class="deck-item" onclick="selectDeck('${deck.id}')" style="${deck.id === currentDeckId ? 'border: 2px solid var(--primary-color); font-weight:bold;' : ''}">
                                 <span><i class="fa-solid fa-book"></i> ${deck.name} (${deck.words.length}語)</span>
                                 <div>
                                     <button class="nav-btn" onclick="event.stopPropagation(); editDeckName('${folder.id}', '${deck.id}')"><i class="fa-solid fa-pen"></i></button>
@@ -1502,33 +1320,21 @@
 
         function createNewFolder() {
             const name = document.getElementById('newFolderName').value;
+            const color = document.getElementById('newFolderColor').value;
             if (!name) return;
             folders.push({
                 id: 'f_' + Date.now(),
                 name: name,
+                color: color,
                 decks: []
             });
             saveAppLocalData();
             renderFolders();
             closeModal('addFolderModal');
+            document.getElementById('newFolderName').value = '';
         }
 
-        function selectDeck(deckId) {
-            currentDeckId = deckId;
-            renderFolders();
-            switchTab('words');
-        }
-
-        // 31. 削除時の警告確認画面付き削除
-        function deleteFolder(folderId) {
-            if (confirm('このフォルダーと含まれる全単語帳を削除してもよろしいですか？')) {
-                folders = folders.filter(f => f.id !== folderId);
-                saveAppLocalData();
-                renderFolders();
-            }
-        }
-
-        function editFolderName(folderId) {
+        function editFolder(folderId) {
             const folder = folders.find(f => f.id === folderId);
             const newName = prompt('新しいフォルダー名を入力してください:', folder.name);
             if (newName) {
@@ -1538,98 +1344,8 @@
             }
         }
 
-        function addDeckToFolder(folderId) {
-            const folder = folders.find(f => f.id === folderId);
-            const name = prompt('新しい単語帳の名前を入力してください:');
-            if (name) {
-                folder.decks.push({
-                    id: 'd_' + Date.now(),
-                    name: name,
-                    words: []
-                });
-                saveAppLocalData();
-                renderFolders();
-            }
-        }
-
-        function deleteDeck(folderId, deckId) {
-            if (confirm('この単語帳を削除してもよろしいですか？')) {
-                const folder = folders.find(f => f.id === folderId);
-                folder.decks = folder.decks.filter(d => d.id !== deckId);
-                saveAppLocalData();
-                renderFolders();
-            }
-        }
-
-        function editDeckName(folderId, deckId) {
-            const folder = folders.find(f => f.id === folderId);
-            const deck = folder.decks.find(d => d.id === deckId);
-            const newName = prompt('単語帳の名前を入力:', deck.name);
-            if (newName) {
-                deck.name = newName;
-                saveAppLocalData();
-                renderFolders();
-            }
-        }
-
         /**
-         * 44-47. アナリティクス描画処理
-         */
-        function updateAnalytics() {
-            const deck = getCurrentDeck();
-            if (!deck) return;
-
-            let words = deck.words;
-            const excludeZero = document.getElementById('analyticsExcludeZero').checked;
-            const rangeVal = document.getElementById('analyticsRange').value;
-
-            // 範囲指定フィルター (46.)
-            if (rangeVal && rangeVal.includes('~')) {
-                const [start, end] = rangeVal.split('~').map(v => parseInt(v.trim()));
-                words = words.filter(w => w.id >= start && w.id <= end);
-            }
-
-            if (excludeZero) {
-                words = words.filter(w => w.level !== 0);
-            }
-
-            const total = words.length;
-            const counts = { 0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0 };
-            words.forEach(w => counts[w.level]++);
-
-            const bar = document.getElementById('analyticsProgressBar');
-            const legend = document.getElementById('analyticsLegend');
-            bar.innerHTML = '';
-            legend.innerHTML = '';
-
-            // 45. 横棒グラフ並び順: Level 1, 2, ..., 5, 6, 0
-            const order = excludeZero ? [1,2,3,4,5,6] : [1,2,3,4,5,6,0];
-
-            order.forEach(lvl => {
-                const cnt = counts[lvl];
-                const pct = total > 0 ? ((cnt / total) * 100).toFixed(1) : 0;
-
-                if (pct > 0) {
-                    const seg = document.createElement('div');
-                    seg.className = `analytics-segment bg-lvl-${lvl}`;
-                    seg.style.width = `${pct}%`;
-                    seg.title = `Level ${lvl}: ${pct}% (${cnt}語)`;
-                    bar.appendChild(seg);
-                }
-
-                // 凡例
-                const leg = document.createElement('div');
-                leg.className = 'legend-item';
-                leg.innerHTML = `
-                    <div class="legend-color bg-lvl-${lvl}"></div>
-                    <span>Lv.${lvl}: ${pct}% | ${cnt}語</span>
-                `;
-                legend.appendChild(leg);
-            });
-        }
-
-        /**
-         * 50-56. 「単語一覧」表の描画
+         * 50-56. 「単語一覧」表の描画 (Levelボタン化)
          */
         function renderWordTable() {
             const deck = getCurrentDeck();
@@ -1638,7 +1354,6 @@
 
             if (!deck) return;
 
-            // フィルター項目の取得 (49.)
             const fNo = document.getElementById('filterNo').value;
             const fWord = document.getElementById('filterWord').value.toLowerCase();
             const fMeaning = document.getElementById('filterMeaning').value.toLowerCase();
@@ -1651,7 +1366,6 @@
                 if (fLvl !== "" && w.level !== parseInt(fLvl)) return false;
                 if (fDate && w.date !== fDate.replace(/-/g, '/')) return false;
                 
-                // 単語No複数・範囲判定 (1~5 or 1,3,5)
                 if (fNo) {
                     if (fNo.includes('~')) {
                         const [s, e] = fNo.split('~').map(Number);
@@ -1668,19 +1382,27 @@
 
             filteredWords.forEach(w => {
                 const tr = document.createElement('tr');
-                // 51. 単語No.基本4桁表記
                 const noFormatted = String(w.id).padStart(4, '0');
                 
+                // 1~6 Level用個別ボタン群の生成
+                let levelButtonsHtml = '<div class="lvl-btn-group">';
+                for (let i = 1; i <= 6; i++) {
+                    const isActive = w.level === i;
+                    levelButtonsHtml += `
+                        <button class="lvl-select-btn bg-lvl-${i} ${isActive ? 'active' : ''}" 
+                                onclick="setWordLevelDirect(${w.id}, ${i})" title="Level ${i}に設定">
+                            ${i}
+                        </button>
+                    `;
+                }
+                levelButtonsHtml += '</div>';
+
                 tr.innerHTML = `
                     <td>${noFormatted}</td>
                     <td><strong>${w.word}</strong></td>
                     <td>${w.meaning}</td>
                     <td>${w.level === 0 ? '<span class="lvl-badge bg-lvl-0">未実施</span>' : w.date}</td>
-                    <td>
-                        <span class="lvl-badge bg-lvl-${w.level}" onclick="changeWordLevelDirect('${w.id}')">
-                            Lv.${w.level}
-                        </span>
-                    </td>
+                    <td>${levelButtonsHtml}</td>
                     <td>
                         <button class="btn btn-secondary" style="padding:4px 8px;" onclick="showWordDetail('${w.id}')">詳細</button>
                         <button class="btn btn-secondary" style="padding:4px 8px;" onclick="resetWordLevel('${w.id}')">リセット</button>
@@ -1690,214 +1412,20 @@
             });
         }
 
-        function clearWordFilters() {
-            document.getElementById('filterNo').value = '';
-            document.getElementById('filterWord').value = '';
-            document.getElementById('filterMeaning').value = '';
-            document.getElementById('filterLevel').value = '';
-            document.getElementById('filterDate').value = '';
-            renderWordTable();
-        }
-
-        // 暗記度のダイレクトタップ変更 (54.)
-        function changeWordLevelDirect(wordId) {
+        // 指定レベルへの直接設定
+        function setWordLevelDirect(wordId, newLevel) {
             const deck = getCurrentDeck();
-            const word = deck.words.find(w => w.id == wordId);
-            // 42. ユーザ操作では1-6間で循環、Level 0には「リセット」ボタンでのみ復帰可能
-            let nextLvl = word.level + 1;
-            if (nextLvl > 6) nextLvl = 1;
-            word.level = nextLvl;
-            word.date = new Date().toISOString().split('T')[0].replace(/-/g, '/');
-            saveAppLocalData();
-            renderWordTable();
-            updateAnalytics();
-        }
-
-        // 42, 55. 暗記度の未実施リセット
-        function resetWordLevel(wordId) {
-            const deck = getCurrentDeck();
-            const word = deck.words.find(w => w.id == wordId);
-            word.level = 0;
-            word.date = '';
-            saveAppLocalData();
-            renderWordTable();
-            updateAnalytics();
-        }
-
-        function showWordDetail(wordId) {
-            const deck = getCurrentDeck();
-            const word = deck.words.find(w => w.id == wordId);
-            alert(`【単語詳細】\nNo: ${String(word.id).padStart(4, '0')}\n単語: ${word.word}\n意味: ${word.meaning}\n暗記度: Level ${word.level}\n最終実施日: ${word.date || '未実施'}`);
-        }
-
-        /**
-         * 57-72. テストシステム ロジック
-         */
-        function startTest() {
-            const deck = getCurrentDeck();
-            if (!deck || deck.words.length === 0) {
-                alert('テストを実施する単語が登録されていません。');
-                return;
-            }
-
-            // テスト用選択条件取得
-            const rangeStr = document.getElementById('testRangeInput').value;
-            const selectedLvls = Array.from(document.querySelectorAll('.test-lvl-chk:checked')).map(cb => Number(cb.value));
-
-            let candidate = deck.words.filter(w => selectedLvls.includes(w.level));
-
-            if (rangeStr) {
-                if (rangeStr.includes('~')) {
-                    const [s, e] = rangeStr.split('~').map(Number);
-                    candidate = candidate.filter(w => w.id >= s && w.id <= e);
-                } else if (rangeStr.includes(',')) {
-                    const nos = rangeStr.split(',').map(Number);
-                    candidate = candidate.filter(w => nos.includes(w.id));
-                }
-            }
-
-            const count = parseInt(document.getElementById('testCountInput').value) || 10;
-            // シャッフルして指定数取得
-            currentTestWords = candidate.sort(() => Math.random() - 0.5).slice(0, count);
-
-            if (currentTestWords.length === 0) {
-                alert('条件に一致する単語が見つかりませんでした。');
-                return;
-            }
-
-            currentTestIndex = 0;
-            document.getElementById('testSetupCard').style.display = 'none';
-            document.getElementById('testResultCard').style.display = 'none';
-            document.getElementById('testRunCard').style.display = 'block';
-
-            renderQuestion();
-        }
-
-        function renderQuestion() {
-            if (currentTestIndex >= currentTestWords.length) {
-                showTestResults();
-                return;
-            }
-
-            const q = currentTestWords[currentTestIndex];
-            const direction = document.getElementById('testDirection').value;
-            const format = document.getElementById('testFormat').value;
-            const showLvl = document.getElementById('testShowLevel').value;
-
-            document.getElementById('testProgressText').innerText = 
-                `第 ${currentTestIndex + 1} / ${currentTestWords.length} 問 (${Math.round(((currentTestIndex)/currentTestWords.length)*100)}%)`;
-
-            document.getElementById('runWordNo').innerText = String(q.id).padStart(4, '0');
-            
-            const lvlBadge = document.getElementById('runWordLvl');
-            if (showLvl === 'on') {
-                lvlBadge.style.display = 'inline-block';
-                lvlBadge.className = `lvl-badge bg-lvl-${q.level}`;
-                lvlBadge.innerText = `Lv.${q.level}`;
-            } else {
-                lvlBadge.style.display = 'none';
-            }
-
-            // 61. 出題向きの設定
-            const questionText = direction === 'wordToMeaning' ? q.word : q.meaning;
-            const correctAnswer = direction === 'wordToMeaning' ? q.meaning : q.word;
-
-            document.getElementById('runQuestionDisplay').innerText = questionText;
-
-            // 読み上げ音量制御付き音声合成
-            speakText(questionText);
-
-            const ansArea = document.getElementById('testAnswerArea');
-            ansArea.innerHTML = '';
-
-            // 64. 出題形式別の回答インターフェース
-            if (format === 'card') {
-                ansArea.innerHTML = `
-                    <button class="btn btn-primary" id="showCardAnsBtn" onclick="document.getElementById('cardAnsDisplay').style.display='block'; this.style.display='none';">答えを表示</button>
-                    <div id="cardAnsDisplay" style="display:none; margin-top:15px;">
-                        <p style="font-size:1.5rem; font-weight:bold; margin-bottom:15px;">${correctAnswer}</p>
-                        <div style="display:flex; gap:10px; justify-content:center;">
-                            <button class="btn btn-primary" onclick="answerCard(true)"><i class="fa-solid fa-check"></i> 分かった</button>
-                            <button class="btn btn-danger" onclick="answerCard(false)"><i class="fa-solid fa-xmark"></i> 分からなかった</button>
-                        </div>
-                    </div>
-                `;
-            } else if (format === 'choice') {
-                // ダミー選択肢の生成
-                const options = [correctAnswer];
-                const deck = getCurrentDeck();
-                while (options.length < 4 && deck.words.length > options.length) {
-                    const randW = deck.words[Math.floor(Math.random() * deck.words.length)];
-                    const optVal = direction === 'wordToMeaning' ? randW.meaning : randW.word;
-                    if (!options.includes(optVal)) options.push(optVal);
-                }
-                options.sort(() => Math.random() - 0.5);
-                options.push('わからない');
-
-                const optContainer = document.createElement('div');
-                optContainer.className = 'test-options';
-                options.forEach(opt => {
-                    const btn = document.createElement('button');
-                    btn.className = 'test-opt-btn';
-                    btn.innerText = opt;
-                    btn.onclick = () => answerChoice(opt === correctAnswer);
-                    optContainer.appendChild(btn);
-                });
-                ansArea.appendChild(optContainer);
-            } else if (format === 'input') {
-                ansArea.innerHTML = `
-                    <input type="text" id="testInputAns" class="form-control" placeholder="回答を入力 (小文字・記号厳密判定)" autocapitalize="none" style="margin-bottom:15px;">
-                    <button class="btn btn-primary" onclick="answerInput('${correctAnswer.replace(/'/g, "\\'")}')">回答送信</button>
-                `;
+            const word = deck.words.find(w => w.id === wordId);
+            if (word) {
+                word.level = newLevel;
+                word.date = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+                saveAppLocalData();
+                renderWordTable();
+                updateAnalytics();
             }
         }
 
-        // Web Speech API による音声読上げ
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                const vol = parseFloat(document.getElementById('volumeRange').value);
-                const uttr = new SpeechSynthesisUtterance(text);
-                uttr.volume = vol;
-                uttr.lang = 'en-US';
-                window.speechSynthesis.speak(uttr);
-            }
-        }
-
-        function answerCard(isCorrect) {
-            recordTestResult(isCorrect);
-        }
-
-        function answerChoice(isCorrect) {
-            recordTestResult(isCorrect);
-        }
-
-        function answerInput(correctAnswer) {
-            const userAns = document.getElementById('testInputAns').value.trim();
-            // 64. 厳格採点 (スペース、大文字小文字、複数語|の完全一致チェック)
-            const allowedAnswers = correctAnswer.split('|').map(a => a.trim());
-            const isCorrect = allowedAnswers.includes(userAns);
-            recordTestResult(isCorrect);
-        }
-
-        function recordTestResult(isCorrect) {
-            const q = currentTestWords[currentTestIndex];
-            q.userCorrect = isCorrect;
-            
-            // 暗記度 Level 推移計算 (正解で1段階向上(1方向)、不正解で下降)
-            q.prevLevel = q.level;
-            if (isCorrect) {
-                if (q.level > 1) q.level--;
-                else if (q.level === 0) q.level = 1;
-            } else {
-                if (q.level < 5) q.level++;
-            }
-            q.date = new Date().toISOString().split('T')[0].replace(/-/g, '/');
-
-            currentTestIndex++;
-            renderQuestion();
-        }
-
-        // 71. リザルト画面描画
+        // テスト結果および履歴描画関数
         function showTestResults() {
             document.getElementById('testRunCard').style.display = 'none';
             document.getElementById('testResultCard').style.display = 'block';
@@ -1906,16 +1434,18 @@
             const pct = Math.round((correctCount / currentTestWords.length) * 100);
             document.getElementById('resultScoreDisplay').innerText = `${pct}% (${correctCount}/${currentTestWords.length})`;
 
-            // テスト実施記録を履歴へ追加 (81.)
+            const currentDeck = getCurrentDeck();
+            // テスト実施記録の更新と保存
             testHistory.unshift({
                 date: new Date().toLocaleString(),
+                deckName: currentDeck ? currentDeck.name : '単語帳',
                 score: `${pct}%`,
-                count: currentTestWords.length
+                count: currentTestWords.length,
+                correct: correctCount
             });
-            if (testHistory.length > 20) testHistory.pop(); // 直近20回分保持
+            if (testHistory.length > 20) testHistory.pop();
             saveAppLocalData();
 
-            // 詳細リスト表示
             const listContainer = document.getElementById('resultListContainer');
             listContainer.innerHTML = '';
             currentTestWords.forEach(w => {
@@ -1940,253 +1470,63 @@
             });
         }
 
-        function updateWordLevelResult(wordId, newLvl) {
-            const deck = getCurrentDeck();
-            const word = deck.words.find(w => w.id == wordId);
-            word.level = parseInt(newLvl);
-            saveAppLocalData();
-        }
+        function renderTestHistory() {
+            const list = document.getElementById('testHistoryList');
+            list.innerHTML = '';
 
-        function abortTest() {
-            if (confirm('テストを中断しますか？ (※ テスト結果は記録されません)')) {
-                document.getElementById('testRunCard').style.display = 'none';
-                document.getElementById('testSetupCard').style.display = 'block';
-            }
-        }
-
-        function finishTest() {
-            saveAppLocalData();
-            document.getElementById('testResultCard').style.display = 'none';
-            document.getElementById('testSetupCard').style.display = 'block';
-            switchTab('words');
-        }
-
-        function retryWrongOnly() {
-            currentTestWords = currentTestWords.filter(w => !w.userCorrect);
-            if (currentTestWords.length === 0) {
-                alert('間違えた問題はありません。');
-                return;
-            }
-            currentTestIndex = 0;
-            document.getElementById('testResultCard').style.display = 'none';
-            document.getElementById('testRunCard').style.display = 'block';
-            renderQuestion();
-        }
-
-        /**
-         * 73-78. 編集タブ 機能
-         */
-        function addSingleWord() {
-            const deck = getCurrentDeck();
-            if (!deck) return;
-
-            const wText = document.getElementById('addWordText').value.trim();
-            const mText = document.getElementById('addMeaningText').value.trim();
-            const initLvl = parseInt(document.getElementById('addInitialLevel').value);
-
-            if (!wText || !mText) {
-                alert('単語と意味を入力してください。');
+            if (testHistory.length === 0) {
+                list.innerHTML = '<li style="text-align:center; padding:15px; color:#888;">テスト履歴はまだありません</li>';
                 return;
             }
 
-            const newId = deck.words.length > 0 ? Math.max(...deck.words.map(w => w.id)) + 1 : 1;
-            deck.words.push({
-                id: newId,
-                word: wText,
-                meaning: mText,
-                level: initLvl,
-                date: initLvl === 0 ? '' : new Date().toISOString().split('T')[0].replace(/-/g, '/')
-            });
-
-            saveAppLocalData();
-            renderEditTable();
-            document.getElementById('addWordText').value = '';
-            document.getElementById('addMeaningText').value = '';
-            alert('単語を追加しました。');
-        }
-
-        // 85-88. CSVインポート (2行目から読み込み, |区切り複数回答対応)
-        function importCSV() {
-            const fileInput = document.getElementById('csvFileInput');
-            const file = fileInput.files[0];
-            const deck = getCurrentDeck();
-
-            if (!file || !deck) {
-                alert('ファイルと対象単語帳を選択してください。');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const lines = e.target.result.split('\n');
-                let count = 0;
-
-                // 2行目からインポート開始 (86.)
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    const cols = line.split(',');
-                    if (cols.length >= 3) {
-                        const wordVal = cols[1].trim();
-                        const meaningVal = cols[2].trim(); // 88. apple | orange など複数選択肢保持
-                        const lvlVal = cols[3] ? parseInt(cols[3].trim()) || 0 : 0;
-
-                        const newId = deck.words.length > 0 ? Math.max(...deck.words.map(w => w.id)) + 1 : 1;
-                        deck.words.push({
-                            id: newId,
-                            word: wordVal,
-                            meaning: meaningVal,
-                            level: lvlVal,
-                            date: lvlVal === 0 ? '' : new Date().toISOString().split('T')[0].replace(/-/g, '/')
-                        });
-                        count++;
-                    }
-                }
-                saveAppLocalData();
-                renderEditTable();
-                alert(`${count}件の単語をインポートしました。`);
-            };
-            reader.readAsText(file);
-        }
-
-        function renderEditTable() {
-            const deck = getCurrentDeck();
-            const tbody = document.getElementById('editTableBody');
-            tbody.innerHTML = '';
-
-            if (!deck) return;
-
-            deck.words.forEach(w => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${String(w.id).padStart(4, '0')}</td>
-                    <td><input type="text" class="form-control" value="${w.word}" onchange="updateWordField(${w.id}, 'word', this.value)"></td>
-                    <td><input type="text" class="form-control" value="${w.meaning}" onchange="updateWordField(${w.id}, 'meaning', this.value)"></td>
-                    <td>Lv.${w.level}</td>
-                    <td>
-                        <button class="btn btn-danger" style="padding:4px 8px;" onclick="deleteSingleWord(${w.id})">削除</button>
-                    </td>
+            testHistory.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'deck-item';
+                li.innerHTML = `
+                    <div>
+                        <strong>${item.deckName || '単語帳'}</strong> (${item.count}問)
+                        <div style="font-size:0.75rem; color:#718096;">${item.date}</div>
+                    </div>
+                    <div style="font-weight:bold; font-size:1.1rem; color:var(--primary-hover);">
+                        ${item.score} (${item.correct}/${item.count})
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                list.appendChild(li);
             });
-        }
-
-        function updateWordField(wordId, field, value) {
-            const deck = getCurrentDeck();
-            const word = deck.words.find(w => w.id === wordId);
-            word[field] = value;
-            saveAppLocalData();
-        }
-
-        function deleteSingleWord(wordId) {
-            if (confirm('この単語を削除してもよろしいですか？')) {
-                const deck = getCurrentDeck();
-                deck.words = deck.words.filter(w => w.id !== wordId);
-                saveAppLocalData();
-                renderEditTable();
-            }
-        }
-
-        // 78. 一括リセットおよび一括削除
-        function batchResetLevel() {
-            const rangeStr = document.getElementById('batchRangeInput').value;
-            const deck = getCurrentDeck();
-            if (!rangeStr || !deck) return;
-
-            const [s, e] = rangeStr.split('~').map(Number);
-            deck.words.forEach(w => {
-                if (w.id >= s && w.id <= e) {
-                    w.level = 0;
-                    w.date = '';
-                }
-            });
-            saveAppLocalData();
-            renderEditTable();
-            alert('指定範囲の暗記度を未実施にリセットしました。');
-        }
-
-        function batchDeleteWords() {
-            const rangeStr = document.getElementById('batchRangeInput').value;
-            const deck = getCurrentDeck();
-            if (!rangeStr || !deck) return;
-
-            if (confirm(`範囲 [${rangeStr}] の単語を一括削除しますか？`)) {
-                const [s, e] = rangeStr.split('~').map(Number);
-                deck.words = deck.words.filter(w => w.id < s || w.id > e);
-                saveAppLocalData();
-                renderEditTable();
-            }
         }
 
         /**
-         * 56, 67, 72. PDF & CSV 出力エクスポート機能
+         * PDF出力機能（一時レンダラーによる崩れ防止対応）
          */
-        function exportCSV() {
-            const deck = getCurrentDeck();
-            if (!deck) return;
-
-            let csv = "通し番号,単語,意味,暗記度\n";
-            deck.words.forEach(w => {
-                csv += `${w.id},"${w.word}","${w.meaning}",${w.level}\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `${deck.name}_単語帳.csv`;
-            link.click();
-        }
-
-        function exportPDF() {
-            const element = document.getElementById('pdfTableTarget');
-            html2pdf().from(element).save('単語一覧.pdf');
-        }
-
         function exportTestPDF() {
             const deck = getCurrentDeck();
-            if (!deck) return;
-            let content = `<h1>テストプリント: ${deck.name}</h1><ol>`;
-            deck.words.forEach(w => {
-                content += `<li style="margin-bottom:15px;">単語: <strong>${w.word}</strong> ______________________ (意味)</li>`;
-            });
-            content += '</ol>';
-            
-            const opt = { margin: 1, filename: '小テストプリント.pdf' };
-            html2pdf().from(content).set(opt).save();
-        }
-
-        function exportResultPDF() {
-            const element = document.getElementById('testResultCard');
-            html2pdf().from(element).save('テスト結果リザルト.pdf');
-        }
-
-        /**
-         * 汎用 UI ヘルパー (モーダル開閉 / ドロップダウン)
-         */
-        function openModal(id) {
-            document.getElementById(id).style.display = 'flex';
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
-        function toggleDropdown(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('show');
-        }
-
-        // ドロップダウン外クリックで閉じる
-        window.onclick = function(event) {
-            if (!event.target.matches('.avatar-btn')) {
-                const dropdowns = document.getElementsByClassName("dropdown-menu");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    const openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
+            if (!deck || deck.words.length === 0) {
+                alert('出力する単語データがありません。');
+                return;
             }
+
+            const tempDiv = document.createElement('div');
+            tempDiv.style.padding = '20px';
+            tempDiv.style.fontFamily = 'sans-serif';
+            
+            let html = `<h2 style="text-align:center; margin-bottom:20px;">${deck.name} - 小テストプリント</h2><ol style="line-height:2.2;">`;
+            deck.words.forEach(w => {
+                html += `<li style="margin-bottom:12px; font-size:1.1rem;">
+                    <strong>${w.word}</strong> : ________________________________________ (解答)
+                </li>`;
+            });
+            html += '</ol>';
+            tempDiv.innerHTML = html;
+
+            const opt = {
+                margin: 10,
+                filename: `${deck.name}_小テスト.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(tempDiv).save();
         }
     </script>
 </body>
