@@ -1,1592 +1,1094 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Y-NoteQ | 単語帳アプリ</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Y-NoteQ</title>
 
-<!-- Font Awesome (アイコン用外部サービス) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<!-- Google Fonts: 日本語=Noto Sans JP / 英数字=Jost(Futuraの代替となる幾何学的サンセリフ体) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Noto Sans JP, Futura代替(Montserrat/Trebuchet MS) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- Firebase (compat SDK / ビルド不要で単一HTMLに組み込むため) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- jSPDF (PDF出力用) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<style>
-/* ============================================================
-   デザイントークン (カラー / タイポグラフィ)
-   メインカラー: #F2CF00系統(マスタードイエロー) + インク紺(#232227)
-   暗記度Lv0-6の配色は指示書の指定に準拠
-   ============================================================ */
-:root{
-  --color-primary:#F2CF00;
-  --color-primary-ink:#3a3200;
-  --color-ink:#232227;
-  --color-bg:#FFFDF6;
-  --color-surface:#FFFFFF;
-  --color-surface-alt:#FFF7DA;
-  --color-border:#E7DFC0;
-  --color-text:#232227;
-  --color-text-sub:#726E5C;
-  --color-danger:#D9534F;
-  --shadow-card:0 2px 10px rgba(35,34,39,0.08);
-  --radius:14px;
-  --font-jp:'Noto Sans JP',sans-serif;
-  --font-latin:'Jost','Noto Sans JP',sans-serif;
-  --lv0-bg:#F1F0EA; --lv0-text:#726E5C; --lv0-border:#D8D5C6;
-  --lv1:#4A8FE7; --lv2:#4FAE5C; --lv3:#E8C547; --lv4:#E8843D; --lv5:#DC5A50; --lv6:#9B6BC8;
-  --header-h:60px;
-  --tab-h:52px;
-  color-scheme: light;
-}
-[data-theme="dark"]{
-  --color-ink:#F5F3E8;
-  --color-bg:#17171B;
-  --color-surface:#212127;
-  --color-surface-alt:#2A2822;
-  --color-border:#3A3930;
-  --color-text:#F5F3E8;
-  --color-text-sub:#B8B4A0;
-  --shadow-card:0 2px 14px rgba(0,0,0,0.45);
-  color-scheme: dark;
-}
+  <style>
+    /* ==========================================================================
+       1. 基本スタイル＆変数定義 (ライト/ダークモード対応)
+       ========================================================================== */
+    :root {
+      --main-color: #F2CF00;
+      --main-hover: #d9b900;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --text-muted: #6c757d;
+      --border-color: #e0e0e0;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
-body{
-  font-family:var(--font-jp);
-  background:var(--color-bg);
-  color:var(--color-text);
-  -webkit-font-smoothing:antialiased;
-  transition:background .25s ease,color .25s ease;
-}
-body, input, button, select, textarea{font-family:var(--font-jp);}
-.num, .latin, button, input[type="number"]{font-family:var(--font-latin),var(--font-jp);}
-h1,h2,h3,h4{margin:0;font-weight:700;}
-button{cursor:pointer;font-size:14px;border:none;background:none;color:inherit;}
-a{color:inherit;}
-::selection{background:var(--color-primary);color:var(--color-primary-ink);}
-.hidden{display:none !important;}
-.screen{min-height:100vh;display:flex;flex-direction:column;}
+      /* 暗記度 Level カラー定義 */
+      --lvl-0: #e9ecef; /* 未実施 */
+      --lvl-1: #4dabf7; /* 青系統 */
+      --lvl-2: #51cf66; /* 緑系統 */
+      --lvl-3: #fcc419; /* 黄系統 */
+      --lvl-4: #ff922b; /* 橙系統 */
+      --lvl-5: #ff6b6b; /* 赤系統 */
+      --lvl-6: #cc5de8; /* 紫系統 */
+    }
 
-/* スクロールバー(デスクトップの見た目調整) */
-::-webkit-scrollbar{width:10px;height:10px;}
-::-webkit-scrollbar-thumb{background:var(--color-border);border-radius:8px;}
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #121212;
+        --card-bg: #1e1e1e;
+        --text-color: #f1f1f1;
+        --text-muted: #a0a0a0;
+        --border-color: #333333;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        --lvl-0: #343a40;
+      }
+    }
 
-/* ============================================================
-   共通パーツ
-   ============================================================ */
-.btn{
-  display:inline-flex;align-items:center;gap:6px;justify-content:center;
-  padding:10px 18px;border-radius:10px;font-weight:600;font-size:14px;
-  transition:transform .12s ease, filter .15s ease; white-space:nowrap;
-}
-.btn:active{transform:scale(0.97);}
-.btn-primary{background:var(--color-primary);color:var(--color-primary-ink);}
-.btn-primary:hover{filter:brightness(1.05);}
-.btn-outline{background:transparent;border:1.5px solid var(--color-border);color:var(--color-text);}
-.btn-outline:hover{border-color:var(--color-primary);}
-.btn-ghost{background:transparent;color:var(--color-text-sub);}
-.btn-danger{background:var(--color-danger);color:#fff;}
-.btn-sm{padding:6px 12px;font-size:12.5px;border-radius:8px;}
-.btn-icon{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;color:var(--color-text);}
-.btn-icon:hover{background:var(--color-surface-alt);}
+    /* 手動切り替え（システム連携用クラス） */
+    body.dark-mode {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #f1f1f1;
+      --text-muted: #a0a0a0;
+      --border-color: #333333;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --lvl-0: #343a40;
+    }
 
-.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-.field label{font-size:12.5px;font-weight:600;color:var(--color-text-sub);}
-.field input, .field select, .field textarea{
-  padding:11px 12px;border-radius:10px;border:1.5px solid var(--color-border);
-  background:var(--color-surface);color:var(--color-text);font-size:15px;outline:none;
-}
-.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--color-primary);}
-.hint{font-size:12px;color:var(--color-text-sub);}
-.error-text{font-size:12.5px;color:var(--color-danger);min-height:16px;}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius);box-shadow:var(--shadow-card);}
+    body {
+      font-family: 'Noto Sans JP', 'Futura', 'Trebuchet MS', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s, color 0.3s;
+    }
 
-/* モーダル共通 */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(20,18,10,0.5);
-  display:flex;align-items:center;justify-content:center;z-index:900;padding:16px;
-}
-.modal-box{
-  background:var(--color-surface);border-radius:16px;max-width:480px;width:100%;
-  max-height:86vh;overflow-y:auto;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,0.3);
-}
-.modal-box.wide{max-width:760px;}
-.modal-title{font-size:18px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+    /* 英数字フォント指定クラス */
+    .num-font, .en-font {
+      font-family: 'Futura', 'Trebuchet MS', sans-serif;
+    }
 
-/* トースト通知 */
-#toast-wrap{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:1200;display:flex;flex-direction:column;gap:8px;align-items:center;}
-.toast{background:var(--color-ink);color:var(--color-bg);padding:10px 18px;border-radius:24px;font-size:13.5px;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;animation:toastIn .25s ease forwards, toastOut .25s ease 2.4s forwards;}
-[data-theme="dark"] .toast{background:var(--color-primary);color:var(--color-primary-ink);}
-@keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-@keyframes toastOut{to{opacity:0;transform:translateY(-6px);}}
+    /* ==========================================================================
+       2. ヘッダー & フッター
+       ========================================================================== */
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow);
+    }
 
-/* ============================================================
-   ログイン / 新規登録 画面
-   ============================================================ */
-.auth-screen{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
-  background:
-    radial-gradient(circle at 15% 20%, rgba(242,207,0,0.16), transparent 45%),
-    radial-gradient(circle at 85% 80%, rgba(74,143,231,0.14), transparent 45%),
-    linear-gradient(160deg, #16161c 0%, #1f2027 45%, #232634 100%);
-  position:relative; overflow:hidden;
-}
-.auth-screen::before{
-  content:"";position:absolute;inset:0;
-  background-image:linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size:42px 42px; mask-image:radial-gradient(circle at 50% 40%, black, transparent 75%);
-}
-.auth-card{
-  position:relative; z-index:1; width:100%; max-width:400px; background:rgba(255,253,246,0.98);
-  border-radius:20px; padding:34px 30px; box-shadow:0 20px 60px rgba(0,0,0,0.45);
-}
-[data-theme="dark"] .auth-card{ background:rgba(24,24,29,0.98); }
-.auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;}
-.auth-logo i{font-size:30px;color:var(--color-primary);}
-.auth-logo span{font-family:var(--font-latin);font-weight:700;font-size:26px;letter-spacing:.5px;}
-.auth-sub{text-align:center;color:var(--color-text-sub);font-size:13px;margin-bottom:26px;}
-.auth-step-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-.auth-step-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px;}
-.auth-step-dots span{width:7px;height:7px;border-radius:50%;background:var(--color-border);}
-.auth-step-dots span.active{background:var(--color-primary);width:20px;border-radius:5px;}
-.auth-links{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:13px;}
-.invite-code-input{letter-spacing:10px;text-align:center;font-size:24px !important;font-family:var(--font-latin);}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-color);
+      text-decoration: none;
+    }
 
-/* ============================================================
-   アプリシェル: ヘッダー
-   ============================================================ */
-.app-shell{min-height:100vh;display:flex;flex-direction:column;}
-.app-header{
-  height:var(--header-h); flex:0 0 auto; display:flex; align-items:center; justify-content:space-between;
-  padding:0 16px; background:var(--color-surface); border-bottom:1px solid var(--color-border);
-  position:sticky; top:0; z-index:200;
-}
-.brand{display:flex;align-items:center;gap:99px;cursor:pointer;}
-.brand i{font-size:22px;color:var(--color-primary);}
-.brand span{font-family:var(--font-latin);font-weight:700;font-size:19px;}
-.header-actions{display:flex;align-items:center;gap:4px;}
-.header-actions .divider{width:1px;height:22px;background:var(--color-border);margin:0 6px;}
-.header-actions .desktop-only{display:flex;}
-.header-hamburger{display:none;}
-.account-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-family:var(--font-latin);font-size:13px;}
-.account-menu{position:absolute;top:52px;right:16px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;box-shadow:var(--shadow-card);min-width:190px;z-index:300;overflow:hidden;}
-.account-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 14px;font-size:13.5px;}
-.account-menu button:hover{background:var(--color-surface-alt);}
-.volume-pop{position:absolute;top:52px;right:60px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;box-shadow:var(--shadow-card);padding:14px;z-index:300;width:170px;}
+    .brand-icon {
+      color: var(--main-color);
+      font-size: 1.8rem;
+    }
 
-/* モバイルメニュー */
-.mobile-menu-panel{position:fixed;inset:0;z-index:500;display:flex;}
-.mobile-menu-panel .backdrop{flex:1;background:rgba(0,0,0,.45);}
-.mobile-menu-panel .panel{width:78vw;max-width:300px;background:var(--color-surface);height:100%;padding:18px;display:flex;flex-direction:column;gap:4px;box-shadow:-6px 0 24px rgba(0,0,0,.25);}
-.mobile-menu-panel .panel button{display:flex;align-items:center;gap:12px;padding:13px 10px;border-radius:10px;font-size:14.5px;text-align:left;}
-.mobile-menu-panel .panel button:hover{background:var(--color-surface-alt);}
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
 
-/* ============================================================
-   タブナビゲーション
-   ============================================================ */
-.tabbar{display:flex;background:var(--color-surface);border-bottom:1px solid var(--color-border);padding:0 10px;position:sticky;top:var(--header-h);z-index:150;overflow-x:auto;}
-.tabbar button{display:flex;align-items:center;gap:7px;padding:13px 16px;font-size:13.5px;font-weight:600;color:var(--color-text-sub);border-bottom:3px solid transparent;white-space:nowrap;}
-.tabbar button.active{color:var(--color-text);border-bottom-color:var(--color-primary);}
-.wordbook-title-bar{padding:10px 18px;font-weight:700;font-size:15px;background:var(--color-surface-alt);border-bottom:1px solid var(--color-border);}
+    .btn-icon {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: var(--text-color);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
 
-.bottom-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--color-surface);border-top:1px solid var(--color-border);z-index:250;padding-bottom:env(safe-area-inset-bottom);}
-.bottom-tabbar .row{display:flex;}
-.bottom-tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 9px;font-size:10.5px;color:var(--color-text-sub);}
-.bottom-tabbar button i{font-size:17px;}
-.bottom-tabbar button.active{color:var(--color-primary);}
+    .btn-icon:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
 
-.main-content{flex:1;padding:20px 22px 60px;max-width:1180px;margin:0 auto;width:100%;}
+    /* アカウントドロップダウン */
+    .user-profile-menu {
+      position: relative;
+      display: none; /* PC版のみ標準表示 */
+    }
 
-/* ============================================================
-   フォルダー・単語帳ホーム画面
-   ============================================================ */
-.section-head{display:flex;align-items:center;justify-content:space-between;margin:26px 0 14px;}
-.section-head:first-child{margin-top:4px;}
-.section-head h2{font-size:16px;}
-.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
-.tile{position:relative;padding:18px 16px 14px;border-radius:16px;color:#fff;min-height:104px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;overflow:hidden;transition:transform .15s ease;}
-.tile:hover{transform:translateY(-2px);}
-.tile .tile-icon{font-size:20px;opacity:.92;}
-.tile .tile-name{font-weight:700;font-size:15px;line-height:1.3;word-break:break-word;}
-.tile .tile-count{font-size:11.5px;opacity:.85;}
-.tile .tile-actions{position:absolute;top:8px;right:8px;display:flex;gap:4px;}
-.tile .tile-actions button{width:26px;height:26px;border-radius:8px;background:rgba(0,0,0,0.18);color:#fff;font-size:11.5px;display:flex;align-items:center;justify-content:center;}
-.tile .tile-actions button:hover{background:rgba(0,0,0,0.32);}
-.tile-add{border:2px dashed var(--color-border);background:transparent;color:var(--color-text-sub);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;font-size:13px;font-weight:600;min-height:104px;border-radius:16px;cursor:pointer;}
-.tile-add:hover{border-color:var(--color-primary);color:var(--color-text);}
-.empty-note{color:var(--color-text-sub);font-size:13.5px;padding:30px 4px;text-align:center;}
-.color-dot-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
-.color-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
-.color-dot.selected{border-color:var(--color-ink);box-shadow:0 0 0 2px var(--color-primary);}
+    @media (min-width: 768px) {
+      .user-profile-menu { display: block; }
+    }
 
-/* ============================================================
-   単語一覧タブ
-   ============================================================ */
-.analytics-box{padding:16px 18px;}
-.analytics-bar{display:flex;height:34px;border-radius:8px;overflow:hidden;margin:12px 0 10px;background:var(--color-surface-alt);}
-.analytics-bar .seg{display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;min-width:0;overflow:hidden;white-space:nowrap;transition:width .3s ease;}
-.analytics-legend{display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12px;}
-.analytics-legend .item{display:flex;align-items:center;gap:6px;}
-.analytics-legend .sw{width:11px;height:11px;border-radius:3px;}
-.analytics-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-top:14px;padding-top:14px;border-top:1px dashed var(--color-border);}
-.analytics-controls .field{margin-bottom:0;min-width:120px;}
-.check-row{display:flex;align-items:center;gap:7px;font-size:13px;padding-bottom:11px;}
+    .avatar-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--main-color);
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+      border: 2px solid var(--border-color);
+    }
 
-.filter-box{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:16px 0;}
-.filter-box .field{margin-bottom:0;}
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      background-color: var(--card-bg);
+      min-width: 160px;
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      z-index: 1001;
+    }
 
-.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--color-border);}
-table.word-table{width:100%;border-collapse:collapse;min-width:680px;background:var(--color-surface);}
-table.word-table th{text-align:left;font-size:12px;color:var(--color-text-sub);padding:10px 12px;background:var(--color-surface-alt);position:sticky;top:0;white-space:nowrap;}
-table.word-table td{padding:10px 12px;font-size:13.5px;border-top:1px solid var(--color-border);vertical-align:middle;}
-table.word-table tr:hover td{background:var(--color-surface-alt);}
-.no-cell{font-family:var(--font-latin);font-weight:600;color:var(--color-text-sub);}
-.unimplemented-chip{display:inline-block;padding:3px 10px;border-radius:6px;background:var(--lv0-bg);color:var(--lv0-text);font-size:12px;font-weight:700;border:1px solid var(--lv0-border);}
-.lv-chip{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 8px;border-radius:7px;font-weight:700;font-size:12.5px;font-family:var(--font-latin);cursor:pointer;border:none;}
-.row-actions{display:flex;gap:6px;}
-.export-row{display:flex;gap:10px;margin:16px 0 4px;flex-wrap:wrap;}
+    .dropdown-content a, .dropdown-content button {
+      color: var(--text-color);
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
 
-/* ============================================================
-   編集タブ
-   ============================================================ */
-.edit-grid{display:grid;grid-template-columns:1fr;gap:20px;}
-@media(min-width:900px){.edit-grid{grid-template-columns:1fr 1fr;}}
-.import-drop{border:2px dashed var(--color-border);border-radius:12px;padding:22px;text-align:center;color:var(--color-text-sub);font-size:13px;}
-.csv-format-box{background:var(--color-surface-alt);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--color-text-sub);margin-top:10px;line-height:1.7;}
-.bulk-box{padding:14px 16px;}
-.bulk-box .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
+    .dropdown-content a:hover, .dropdown-content button:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
 
-/* ============================================================
-   テスト設定・実施・結果
-   ============================================================ */
-.test-setup-grid{display:grid;grid-template-columns:1fr;gap:18px;}
-@media(min-width:900px){.test-setup-grid{grid-template-columns:1fr 1fr;}}
-.opt-group{padding:16px 18px;}
-.opt-group h4{font-size:13px;margin-bottom:12px;color:var(--color-text-sub);display:flex;align-items:center;gap:7px;}
-.choice-row{display:flex;flex-wrap:wrap;gap:8px;}
-.choice-pill{padding:8px 14px;border-radius:20px;border:1.5px solid var(--color-border);font-size:13px;cursor:pointer;}
-.choice-pill.selected{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-primary-ink);font-weight:700;}
-.level-pill-row{display:flex;flex-wrap:wrap;gap:8px;}
-.level-pill{padding:7px 13px;border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;opacity:.4;border:2px solid transparent;font-family:var(--font-latin);}
-.level-pill.selected{opacity:1;border-color:var(--color-ink);}
+    .show { display: block; }
 
-.test-progress-bar{height:8px;border-radius:6px;background:var(--color-surface-alt);overflow:hidden;}
-.test-progress-bar .fill{height:100%;background:var(--color-primary);transition:width .25s ease;}
-.test-topbar{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--color-text-sub);margin-bottom:8px;}
-.test-timer{font-family:var(--font-latin);font-weight:700;font-size:16px;color:var(--color-text);}
-.test-card{padding:40px 26px;text-align:center;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:18px;}
-.test-word-no{font-family:var(--font-latin);color:var(--color-text-sub);font-size:13px;}
-.test-word-main{font-size:clamp(28px,6vw,46px);font-weight:700;word-break:break-word;}
-.test-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
-@media(max-width:520px){.test-choices{grid-template-columns:1fr;}}
-.test-choice-btn{padding:14px;border-radius:12px;border:1.5px solid var(--color-border);font-size:14.5px;background:var(--color-surface);text-align:center;}
-.test-choice-btn:hover{border-color:var(--color-primary);}
-.test-choice-btn.correct{background:var(--lv2);border-color:var(--lv2);color:#fff;}
-.test-choice-btn.wrong{background:var(--lv5);border-color:var(--lv5);color:#fff;}
-.test-input-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-.test-input-row input{padding:13px 16px;border-radius:10px;border:1.5px solid var(--color-border);font-size:16px;min-width:220px;text-align:center;}
-.flip-btn{margin:0 auto;}
-.result-summary{text-align:center;padding:30px 20px;}
-.result-score{font-family:var(--font-latin);font-size:52px;font-weight:700;color:var(--color-primary-ink);background:var(--color-primary);width:130px;height:130px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
-[data-theme="dark"] .result-score{color:var(--color-primary-ink);}
-.result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
-.qa-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-top:1px solid var(--color-border);gap:10px;flex-wrap:wrap;font-size:13px;}
-.qa-row .qtext{font-weight:600;}
-.qa-row .badge-correct{color:var(--lv2);font-weight:700;}
-.qa-row .badge-wrong{color:var(--lv5);font-weight:700;}
+    footer {
+      margin-top: auto;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      background-color: var(--card-bg);
+    }
 
-/* ============================================================
-   アカウント / 共有タブ
-   ============================================================ */
-.profile-head{display:flex;align-items:center;gap:16px;padding:20px;}
-.profile-head .avatar-lg{width:66px;height:66px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700;font-family:var(--font-latin);flex:0 0 auto;}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;padding:0 20px 20px;}
-.stat-grid .stat{text-align:center;background:var(--color-surface-alt);border-radius:10px;padding:12px 6px;}
-.stat-grid .stat b{display:block;font-family:var(--font-latin);font-size:19px;}
-.history-row{display:flex;justify-content:space-between;padding:10px 20px;border-top:1px solid var(--color-border);font-size:13px;}
-.share-panel{padding:20px;}
-.share-code-box{display:flex;gap:10px;align-items:center;background:var(--color-surface-alt);padding:14px 16px;border-radius:12px;margin:12px 0;}
-.share-code-box code{font-family:var(--font-latin);font-size:20px;letter-spacing:3px;font-weight:700;}
+    /* ==========================================================================
+       3. 認証 (ログイン / 新規登録) - 近代風デザイン
+       ========================================================================== */
+    .auth-container {
+      max-width: 420px;
+      margin: 3rem auto;
+      padding: 2.5rem;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
 
-/* ============================================================
-   フッター / 使い方 / パッチノート
-   ============================================================ */
-.app-footer{text-align:center;font-size:11.5px;color:var(--color-text-sub);padding:22px 10px 90px;border-top:1px solid var(--color-border);margin-top:20px;}
-.usage-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px dashed var(--color-border);}
-.usage-row b{flex:0 0 110px;color:var(--color-primary-ink);background:var(--color-surface-alt);padding:2px 8px;border-radius:6px;height:fit-content;font-size:12.5px;}
-.patch-entry{padding:12px 0;border-bottom:1px solid var(--color-border);}
-.patch-entry .ver{font-family:var(--font-latin);font-weight:700;font-size:14px;}
-.patch-entry .date{font-size:11.5px;color:var(--color-text-sub);margin-left:8px;}
-.patch-entry ul{margin:8px 0 0;padding-left:18px;font-size:13px;}
-details.patch-archive summary{cursor:pointer;font-size:12.5px;color:var(--color-text-sub);padding:8px 0;}
+    body.dark-mode .auth-container {
+      background: rgba(30, 30, 30, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-/* レスポンシブ対応 */
-@media (max-width: 900px){
-  .header-actions .desktop-only{display:none;}
-  .header-hamburger{display:flex;}
-  .tabbar{display:none;}
-  .bottom-tabbar{display:block;}
-  .main-content{padding:16px 14px 90px;}
-  .test-choices{grid-template-columns:1fr 1fr;}
-}
-@media (max-width: 520px){
-  .auth-card{padding:26px 20px;}
-  .profile-head{flex-direction:column;text-align:center;}
-  .filter-box{grid-template-columns:1fr 1fr;}
-  .grid-cards{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
-}
-@media print{
-  .app-header,.tabbar,.bottom-tabbar,.app-footer,.export-row,.row-actions{display:none !important;}
-}
-</style>
+    .auth-title {
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: none;
+      background-color: var(--main-color);
+      color: #333;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--main-hover);
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 1rem;
+    }
+
+    /* ==========================================================================
+       4. メイン領域 & タブナビゲーション
+       ========================================================================== */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      background-color: var(--card-bg);
+      padding: 0.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+
+    /* スマホ対応: タブを画面下に固定 */
+    @media (max-width: 767px) {
+      .tab-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+        border-top: 1px solid var(--border-color);
+        z-index: 999;
+        justify-content: space-around;
+      }
+      main { padding-bottom: 5rem; }
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background-color: var(--main-color);
+      color: #333;
+      font-weight: 700;
+    }
+
+    .screen-section {
+      display: none;
+    }
+
+    .screen-section.active {
+      display: block;
+    }
+
+    /* 単語帳表示中の上部単語帳名 */
+    .deck-header-title {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--main-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ==========================================================================
+       5. 各機能画面 (フォルダー、単語一覧、テスト等)
+       ========================================================================== */
+    /* カード・グリッド */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .folder-card, .deck-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      justify-content: flex-end;
+    }
+
+    /* アナリティクス (1本グラフ) */
+    .analytics-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .bar-graph-container {
+      height: 24px;
+      width: 100%;
+      background-color: var(--lvl-0);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      margin: 1rem 0;
+    }
+
+    .bar-segment {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    /* 単語テーブル */
+    .table-responsive {
+      overflow-x: auto;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    /* Level バッジ */
+    .badge-lvl {
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-weight: bold;
+      color: #333;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .lvl-0 { background-color: var(--lvl-0); color: var(--text-color); }
+    .lvl-1 { background-color: var(--lvl-1); }
+    .lvl-2 { background-color: var(--lvl-2); }
+    .lvl-3 { background-color: var(--lvl-3); }
+    .lvl-4 { background-color: var(--lvl-4); }
+    .lvl-5 { background-color: var(--lvl-5); }
+    .lvl-6 { background-color: var(--lvl-6); color: #fff; }
+
+    /* モーダル */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: var(--shadow);
+    }
+  </style>
 </head>
 <body>
-<div id="toast-wrap"></div>
-<div id="app-root"></div>
 
-<script>
-/* ============================================================
-   Firebase 初期化
-   ============================================================ */
-const firebaseConfig = {
-  apiKey: "AIzaSyC4X91yGIZkHxj3xPOAnc_R5uuCVw0iwtI",
-  authDomain: "y-noteq-a.firebaseapp.com",
-  databaseURL: "https://y-noteq-a-default-rtdb.firebaseio.com",
-  projectId: "y-noteq-a",
-  storageBucket: "y-noteq-a.firebasestorage.app",
-  messagingSenderId: "500955780666",
-  appId: "1:500955780666:web:88ba469096c53525590703",
-  measurementId: "G-SWPW6NYML4"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+  <!-- ==========================================================================
+     ヘッダー
+     ========================================================================== -->
+  <header>
+    <a class="brand" id="headerBrand">
+      <i class="fa-solid fa-italic brand-icon"></i> <!-- ペンギン風代替アイコン -->
+      <span>Y-NoteQ</span>
+    </a>
 
-/* フラグ設定 */
-const REQUIRE_INVITE_CODE = true;
+    <div class="header-controls">
+      <button class="btn-icon" id="btnBack" title="戻る"><i class="fa-solid fa-arrow-left"></i></button>
+      <button class="btn-icon" id="btnHelp" title="使い方"><i class="fa-solid fa-circle-question"></i></button>
+      <button class="btn-icon" id="btnPatch" title="パッチノート"><i class="fa-solid fa-list-check"></i></button>
+      <button class="btn-icon" id="btnThemeToggle" title="モード切り替え"><i class="fa-solid fa-moon"></i></button>
 
-/* 暗記度(Level)の定義 */
-const LEVELS = [
-  {v:0, label:"未実施", css:"var(--lv0-bg)", text:"var(--lv0-text)", border:"var(--lv0-border)"},
-  {v:1, label:"Lv1",   css:"var(--lv1)", text:"#fff"},
-  {v:2, label:"Lv2",   css:"var(--lv2)", text:"#fff"},
-  {v:3, label:"Lv3",   css:"var(--lv3)", text:"#3a3200"},
-  {v:4, label:"Lv4",   css:"var(--lv4)", text:"#fff"},
-  {v:5, label:"Lv5",   css:"var(--lv5)", text:"#fff"},
-  {v:6, label:"Lv6",   css:"var(--lv6)", text:"#fff"},
-];
-function levelInfo(v){ return LEVELS[Math.max(0,Math.min(6, v|0))]; }
+      <!-- 音量調整 -->
+      <i class="fa-solid fa-volume-high" style="font-size: 0.9rem; color: var(--text-muted);"></i>
+      <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.5" style="width: 60px;">
 
-/* アプリ全体の状態(state) */
-const state = {
-  authUser: null,
-  profile: null,
-  data: null,
-  route: "login",
-  signupStep: REQUIRE_INVITE_CODE ? "invite" : "email",
-  theme: localStorage.getItem("ynq_theme") || "auto",
-  currentFolderId: null,
-  currentWordbookId: null,
-  currentTab: "folder",
-  testSession: null,
-  navHistory: [],
-  mobileMenuOpen: false,
-  accountMenuOpen: false,
-};
+      <!-- アカウント（PC表示用） -->
+      <div class="user-profile-menu">
+        <div class="avatar-btn" id="avatarBtn">U</div>
+        <div class="dropdown-content" id="avatarDropdown">
+          <button id="menuProfile"><i class="fa-solid fa-user"></i> プロフィール</button>
+          <button id="menuBug"><i class="fa-solid fa-bug"></i> バグを報告</button>
+          <button id="menuLogout" style="color: #ff6b6b;"><i class="fa-solid fa-right-from-bracket"></i> ログアウト</button>
+        </div>
+      </div>
+    </div>
+  </header>
 
-/* ユーティリティ */
-function $(sel, root){ return (root||document).querySelector(sel); }
-function $all(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
-function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
-function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-function pad4(n){ return String(n).padStart(4,"0"); }
-function todayStr(){ const d=new Date(); return d.getFullYear()+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+String(d.getDate()).padStart(2,"0"); }
-function toast(msg){
-  const wrap = $("#toast-wrap");
-  if(!wrap) return;
-  const el = document.createElement("div");
-  el.className = "toast";
-  el.textContent = msg;
-  wrap.appendChild(el);
-  setTimeout(()=>el.remove(), 2700);
-}
-function splitAnswers(str){ return String(str||"").split("|").map(s=>s.trim()).filter(Boolean); }
+  <!-- ==========================================================================
+     メインコンテンツ
+     ========================================================================== -->
+  <main>
+    <!-- 1. ログイン画面 -->
+    <section id="screenLogin" class="screen-section active">
+      <div class="auth-container">
+        <h2 class="auth-title"><i class="fa-solid fa-italic" style="color:var(--main-color);"></i> Y-NoteQ</h2>
+        <form id="formLogin">
+          <div class="form-group">
+            <label>メールアドレス</label>
+            <input type="email" id="loginEmail" class="form-control" required placeholder="example@mail.com">
+          </div>
+          <div class="form-group">
+            <label>パスワード</label>
+            <input type="password" id="loginPassword" class="form-control" required>
+          </div>
+          <button type="submit" class="btn-primary">ログイン</button>
+        </form>
+        <button class="btn-link" id="btnGoRegister">新規登録はこちら</button>
+      </div>
+    </section>
 
-/* テーマ切り替え */
-function applyTheme(){
-  let mode = state.theme;
-  if(mode === "auto"){
-    mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-  document.documentElement.setAttribute("data-theme", mode);
-}
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ if(state.theme==="auto") applyTheme(); });
-function cycleTheme(){
-  state.theme = state.theme === "auto" ? "light" : state.theme === "light" ? "dark" : "auto";
-  localStorage.setItem("ynq_theme", state.theme);
-  applyTheme();
-  render();
-}
-applyTheme();
+    <!-- 2. 新規登録画面 -->
+    <section id="screenRegister" class="screen-section">
+      <div class="auth-container">
+        <h2 class="auth-title">Y-NoteQ 新規登録</h2>
 
-/* 履歴制御 */
-function pushHistory(){ state.navHistory.push(JSON.stringify({t:state.currentTab, f:state.currentFolderId, w:state.currentWordbookId, r:state.route})); if(state.navHistory.length>30) state.navHistory.shift(); }
-function goBack(){
-  const prev = state.navHistory.pop();
-  if(!prev){ toast("これ以上戻れません"); return; }
-  const p = JSON.parse(prev);
-  state.currentTab = p.t; state.currentFolderId = p.f; state.currentWordbookId = p.w; state.route = p.r;
-  render();
-}
+        <!-- STEP 1: 招待コード (将来の無効化対応可能コード設計) -->
+        <div id="registerStepCode">
+          <div class="form-group">
+            <label>招待コード (6桁数字)</label>
+            <input type="text" id="regInviteCode" class="form-control" maxlength="6" placeholder="123456">
+          </div>
+          <button class="btn-primary" id="btnVerifyCode">次へ</button>
+        </div>
 
-/* Firestore同期 */
-function defaultUserData(){ return { folders: [], testHistory: [] }; }
-function userDocRef(uidStr){ return db.collection("users").doc(uidStr); }
+        <!-- STEP 2: アカウント情報登録 -->
+        <div id="registerStepForm" style="display: none;">
+          <form id="formRegister">
+            <div class="form-group">
+              <label>メールアドレス</label>
+              <input type="email" id="regEmail" class="form-control" required placeholder="example@mail.com">
+            </div>
+            <div class="form-group">
+              <label>パスワード (8文字以上)</label>
+              <input type="password" id="regPassword" class="form-control" minlength="8" required>
+            </div>
+            <div class="form-group">
+              <label>パスワード (確認)</label>
+              <input type="password" id="regPasswordConfirm" class="form-control" minlength="8" required>
+            </div>
+            <button type="submit" class="btn-primary">登録完了</button>
+          </form>
+        </div>
+        <button class="btn-link" id="btnGoLogin">ログイン画面に戻る</button>
+      </div>
+    </section>
 
-let saveTimer = null;
-function scheduleSave(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveUserData, 500);
-}
-function saveUserData(){
-  if(!state.authUser || !state.data) return;
-  userDocRef(state.authUser.uid).set({ appData: state.data, updatedAt: Date.now() }, {merge:true})
-    .catch(err=>toast("保存に失敗しました: "+err.message));
-}
+    <!-- 3. メインアプリ空間 (ログイン後) -->
+    <section id="screenApp" class="screen-section">
+      <!-- 単語帳開いてる場合のみ表示されるタイトルヘッダー -->
+      <div id="deckTitleContainer" class="deck-header-title" style="display: none;">
+        <i class="fa-solid fa-book"></i> <span id="currentDeckName">単語帳名</span>
+      </div>
 
-auth.onAuthStateChanged(async (user)=>{
-  if(user){
-    state.authUser = user;
-    try{
-      const snap = await userDocRef(user.uid).get();
-      if(snap.exists){
-        const d = snap.data();
-        state.profile = d.profile || {username:(user.email||"user").split("@")[0], iconColor:"#4A8FE7"};
-        state.data = d.appData || defaultUserData();
-      }else{
-        state.profile = {username:(user.email||"user").split("@")[0], iconColor: randomAvatarColor()};
-        state.data = defaultUserData();
-        await userDocRef(user.uid).set({profile:state.profile, appData:state.data, createdAt:Date.now()});
+      <!-- タブナビゲーション -->
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="tabFolder"><i class="fa-solid fa-folder"></i> フォルダー</button>
+        <button class="tab-btn" data-tab="tabList"><i class="fa-solid fa-list"></i> 単語一覧</button>
+        <button class="tab-btn" data-tab="tabTest"><i class="fa-solid fa-graduation-cap"></i> テスト</button>
+        <button class="tab-btn" data-tab="tabEdit"><i class="fa-solid fa-pen-to-square"></i> 編集</button>
+        <button class="tab-btn" data-tab="tabShare"><i class="fa-solid fa-share-nodes"></i> 共有</button>
+        <button class="tab-btn mobile-only-tab" data-tab="tabAccount"><i class="fa-solid fa-user"></i> アカウント</button>
+      </nav>
+
+      <!-- タブ内容: 1. フォルダー一覧 (ホーム) -->
+      <div id="tabFolder" class="tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3>フォルダー / 単語帳 一覧</h3>
+          <button class="btn-primary" style="width: auto; padding: 0.5rem 1rem;" id="btnAddFolder"><i class="fa-solid fa-plus"></i> 新規フォルダー</button>
+        </div>
+        <div class="grid-container" id="folderContainer">
+          <!-- JSで動的に追加されます -->
+        </div>
+      </div>
+
+      <!-- タブ内容: 2. 単語一覧 -->
+      <div id="tabList" class="tab-content" style="display: none;">
+        <!-- アナリティクス -->
+        <div class="analytics-box">
+          <h4>アナリティクス</h4>
+          <div style="display: flex; gap: 1rem; margin-top: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="analyticsRange" class="form-control" placeholder="範囲指定 (例: 0001~0005)" style="width: 200px;">
+            <label><input type="checkbox" id="analyticsExcludeZero"> 未実施(L0)を除く</label>
+          </div>
+          <div class="bar-graph-container" id="analyticsGraphBar"></div>
+          <div id="analyticsLegend" style="font-size: 0.85rem; display: flex; gap: 0.8rem; flex-wrap: wrap;"></div>
+        </div>
+
+        <!-- 検索フィルター -->
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="text" id="filterNo" class="form-control" placeholder="単語No (範囲:1-5, 複数:3,5)" style="width: 180px;">
+          <input type="text" id="filterText" class="form-control" placeholder="単語・意味 検索" style="width: 180px;">
+          <button class="btn-primary" style="width: auto;" id="btnResetFilter">クリア</button>
+          <button class="btn-primary" style="width: auto; background-color: #4dabf7; color: white;" id="btnExportPDF">PDF出力</button>
+        </div>
+
+        <!-- テーブル -->
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>単語No.</th>
+                <th>単語</th>
+                <th>意味</th>
+                <th>実施日</th>
+                <th>暗記度</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="wordTableBody">
+              <!-- JSで生成 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- タブ内容: 3. テスト -->
+      <div id="tabTest" class="tab-content" style="display: none;">
+        <!-- テスト設定画面 -->
+        <div id="testSetupConfig" class="analytics-box">
+          <h3>小テスト設定</h3>
+          <div class="form-group" style="margin-top: 1rem;">
+            <label>出題範囲 / 特定No指定</label>
+            <input type="text" id="testRange" class="form-control" placeholder="1-10 または 1,3,5">
+          </div>
+          <div class="form-group">
+            <label>出題数</label>
+            <input type="number" id="testCount" class="form-control" value="10">
+          </div>
+          <div class="form-group">
+            <label>出題の向き</label>
+            <select id="testDirection" class="form-control">
+              <option value="word-def">出題: 単語 -> 解答: 意味</option>
+              <option value="def-word">出題: 意味 -> 解答: 単語</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>出題形式</label>
+            <select id="testMode" class="form-control">
+              <option value="card">単語カード</option>
+              <option value="choice">4択問題</option>
+              <option value="write">入力記述 (厳密採点)</option>
+            </select>
+          </div>
+          <button class="btn-primary" id="btnStartTest">設定した条件でテスト開始</button>
+        </div>
+
+        <!-- テスト実行画面 -->
+        <div id="testRunner" style="display: none;" class="analytics-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <span id="testProgressText">第 1 問 / 進捗 0%</span>
+            <span id="testTimerText" class="num-font" style="font-weight: bold; color: #ff6b6b;"></span>
+          </div>
+          <div style="text-align: center; padding: 2rem 0;">
+            <div id="testQuestionNo" class="num-font" style="color: var(--text-muted);">No.0001</div>
+            <h2 id="testQuestionText" style="font-size: 2.5rem; margin: 1rem 0;">Word</h2>
+            
+            <!-- カード形式回答領域 -->
+            <div id="testCardArea">
+              <button class="btn-primary" id="btnShowAnswer" style="width: 200px;">答えを表示</button>
+              <div id="testAnswerBlock" style="display: none; margin-top: 1.5rem;">
+                <h3 id="testAnswerText" style="margin-bottom: 1.5rem; color: var(--main-hover);">Answer</h3>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                  <button class="btn-primary" id="btnAnsWrong" style="background-color: var(--lvl-5); color: white;">不正解</button>
+                  <button class="btn-primary" id="btnAnsCorrect" style="background-color: var(--lvl-2); color: white;">正解</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-link" id="btnAbortTest" style="color: #ff6b6b;">テストを中断</button>
+        </div>
+      </div>
+
+      <!-- タブ内容: 4. 編集 -->
+      <div id="tabEdit" class="tab-content" style="display: none;">
+        <div class="analytics-box">
+          <h3>単語の追加 (直接入力)</h3>
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+            <input type="text" id="addWordText" class="form-control" placeholder="単語" style="flex:1;">
+            <input type="text" id="addDefText" class="form-control" placeholder="意味 (複数可能: apple | orange)" style="flex:1;">
+            <select id="addLvlSelect" class="form-control" style="width: 100px;">
+              <option value="0">L0</option>
+              <option value="1">L1</option>
+              <option value="2">L2</option>
+            </select>
+            <button class="btn-primary" id="btnAddWordSingle" style="width: auto;">追加</button>
+          </div>
+        </div>
+
+        <div class="analytics-box">
+          <h3>CSV インポート</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">形式: [通し番号, 単語, 意味, 暗記度(0-6)] (2行目から読み込まれます)</p>
+          <input type="file" id="csvFileInput" accept=".csv">
+        </div>
+      </div>
+
+      <!-- タブ内容: 5. 共有 -->
+      <div id="tabShare" class="tab-content" style="display: none;">
+        <div class="analytics-box">
+          <h3>単語帳の共有</h3>
+          <p>他のユーザーと単語帳を共有・インポートできます（開発中プレースホルダー）。</p>
+        </div>
+      </div>
+
+      <!-- タブ内容: 6. アカウント (スマホ表示用) -->
+      <div id="tabAccount" class="tab-content" style="display: none;">
+        <div class="analytics-box">
+          <h3>アカウント情報</h3>
+          <p>ユーザー: <span id="accUserEmail">user@example.com</span></p>
+          <button class="btn-primary" id="btnMobileLogout" style="margin-top: 1rem; background-color: #ff6b6b; color: white;">ログアウト</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- モーダル: 使い方 -->
+  <div class="modal" id="modalHelp">
+    <div class="modal-content">
+      <h3>使い方ガイド</h3>
+      <p style="margin-top: 1rem;">・<b>[フォルダー]</b> 単語帳を分類・管理します。<br>・<b>[暗記度]</b> L0(未実施)〜L6(度忘れ)の7段階で管理されます。</p>
+      <button class="btn-primary" style="margin-top: 1.5rem;" onclick="document.getElementById('modalHelp').style.display='none'">閉じる</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Y-NoteQ All Rights Reserved.</p>
+  </footer>
+
+  <!-- ==========================================================================
+     Firebase SDK (Compat/v9 互換モード読み込み)
+     ※ここがエラー回避の重要ポイントです。CDN形式と構文を合致させています。
+     ========================================================================== -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    /* ==========================================================================
+       Firebase 初期化 (指定されたConfig)
+       ========================================================================== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4X91yGIZkHxj3xPOAnc_R5uuCVw0iwtI",
+      authDomain: "y-noteq-a.firebaseapp.com",
+      databaseURL: "https://y-noteq-a-default-rtdb.firebaseio.com",
+      projectId: "y-noteq-a",
+      storageBucket: "y-noteq-a.firebasestorage.app",
+      messagingSenderId: "500955780666",
+      appId: "1:500955780666:web:88ba469096c53525590703",
+      measurementId: "G-SWPW6NYML4"
+    };
+
+    // Firebase App の初期化
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    /* ==========================================================================
+       アプリケーション状態 (State)
+       ========================================================================== */
+    let currentUser = null;
+    let currentDeck = {
+      id: "demo",
+      name: "基本英単語",
+      words: [
+        { no: 1, word: "apple", def: "りんご", lvl: 0, date: null },
+        { no: 2, word: "orange", def: "みかん", lvl: 1, date: "2026/05/25" },
+        { no: 3, word: "desk", def: "机", lvl: 5, date: "2026/05/25" }
+      ]
+    };
+
+    // 招待コード機能フラグ (アップデートでここを false にすれば無効化可能)
+    const REQUIRE_INVITE_CODE = true;
+    const VALID_INVITE_CODE = "123456";
+
+    /* ==========================================================================
+       画面遷移・認証ロジック
+       ========================================================================== */
+    // Firebase Auth 状態監視
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        showScreen('screenApp');
+        document.getElementById('accUserEmail').innerText = user.email;
+        document.getElementById('avatarBtn').innerText = user.email.charAt(0).toUpperCase();
+        renderWordTable();
+        renderAnalytics();
+      } else {
+        currentUser = null;
+        showScreen('screenLogin');
       }
-      state.route = "app";
-    }catch(err){
-      toast("データ取得エラー: "+err.message);
-      state.route = "app"; state.data = defaultUserData(); state.profile = {username:"user", iconColor:"#4A8FE7"};
+    });
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen-section').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
     }
-  }else{
-    state.authUser = null; state.profile = null; state.data = null; state.route = "login";
-  }
-  render();
-});
-function randomAvatarColor(){
-  const palette = ["#4A8FE7","#4FAE5C","#E8843D","#DC5A50","#9B6BC8","#2FB2B2","#E0A72D"];
-  return palette[Math.floor(Math.random()*palette.length)];
-}
-function initials(name){ return (name||"?").trim().slice(0,2).toUpperCase(); }
 
-function getFolder(id){ return (state.data?.folders||[]).find(f=>f.id===id); }
-function getWordbook(folderId, wbId){ const f=getFolder(folderId); return f && (f.wordbooks||[]).find(w=>w.id===wbId); }
-function currentWordbook(){ return getWordbook(state.currentFolderId, state.currentWordbookId); }
+    // ログイン処理
+    document.getElementById('formLogin').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPassword').value;
+      
+      auth.signInWithEmailAndPassword(email, pass)
+        .catch(err => alert("ログインエラー: " + err.message));
+    });
 
-/* メインレンダラー */
-function render(){
-  const root = $("#app-root");
-  if(!root) return;
-  if(state.route === "login"){ root.innerHTML = renderLoginHTML(); bindLogin(); return; }
-  if(state.route === "signup"){ root.innerHTML = renderSignupHTML(); bindSignup(); return; }
-  root.innerHTML = renderAppShellHTML();
-  bindAppShell();
-}
+    // 画面切り替えボタン
+    document.getElementById('btnGoRegister').addEventListener('click', () => showScreen('screenRegister'));
+    document.getElementById('btnGoLogin').addEventListener('click', () => showScreen('screenLogin'));
 
-/* ============================================================
-   ログイン画面
-   ============================================================ */
-function renderLoginHTML(){
-  return `
-  <div class="auth-screen">
-    <div class="auth-card">
-      <div class="auth-logo"><i class="fa-solid fa-hippo" style="color:var(--color-primary)"></i><span>Y-NoteQ</span></div>
-      <div class="auth-sub">単語の暗記度を、あなたのペースで管理する</div>
-      <div class="field">
-        <label>メールアドレス</label>
-        <input type="email" id="login-email" placeholder="you@example.com" autocomplete="username">
-      </div>
-      <div class="field">
-        <label>ユーザーパスワード</label>
-        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <div class="error-text" id="login-error"></div>
-      <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;" onclick="doLogin()">
-        <i class="fa-solid fa-right-to-bracket"></i> ログイン
-      </button>
-      <div class="auth-links">
-        <span></span>
-        <button class="btn-ghost" style="text-decoration:underline;" onclick="state.route='signup'; state.signupStep=${REQUIRE_INVITE_CODE?'"invite"':'"email"'}; render();">新規登録はこちら</button>
-      </div>
-    </div>
-  </div>`;
-}
-function bindLogin(){
-  const passEl = $("#login-pass");
-  if(passEl) passEl.addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
-}
-async function doLogin(){
-  const email = $("#login-email").value.trim();
-  const pass = $("#login-pass").value;
-  const errEl = $("#login-error");
-  errEl.textContent = "";
-  if(!email || !pass){ errEl.textContent = "メールアドレスとパスワードを入力してください。"; return; }
-  try{
-    await auth.signInWithEmailAndPassword(email, pass);
-    toast("ログインしました");
-  }catch(err){
-    errEl.textContent = "ログインに失敗しました: " + translateAuthError(err);
-  }
-}
-function translateAuthError(err){
-  const code = err && err.code || "";
-  const map = {
-    "auth/invalid-email":"メールアドレスの形式が正しくありません",
-    "auth/user-not-found":"アカウントが見つかりません",
-    "auth/wrong-password":"パスワードが違います",
-    "auth/invalid-credential":"メールアドレスまたはパスワードが違います",
-    "auth/email-already-in-use":"このメールアドレスは既に登録されています",
-    "auth/weak-password":"パスワードは8文字以上にしてください",
-    "auth/too-many-requests":"試行回数が多すぎます。しばらくしてから再試行してください",
-  };
-  return map[code] || err.message || "不明なエラー";
-}
+    // 招待コード認証 (新規登録 STEP1)
+    document.getElementById('btnVerifyCode').addEventListener('click', () => {
+      if (!REQUIRE_INVITE_CODE) {
+        document.getElementById('registerStepCode').style.display = 'none';
+        document.getElementById('registerStepForm').style.display = 'block';
+        return;
+      }
+      const code = document.getElementById('regInviteCode').value;
+      if (code === VALID_INVITE_CODE) {
+        document.getElementById('registerStepCode').style.display = 'none';
+        document.getElementById('registerStepForm').style.display = 'block';
+      } else {
+        alert("招待コードが正しくありません。");
+      }
+    });
 
-/* ============================================================
-   新規登録画面 (招待コード → メール → パスワード×2)
-   ============================================================ */
-const signupData = { code:"", email:"", pass1:"", pass2:"" };
-function renderSignupHTML(){
-  const steps = REQUIRE_INVITE_CODE ? ["invite","email","password"] : ["email","password"];
-  const stepIdx = steps.indexOf(state.signupStep);
-  const dots = steps.map((s,i)=>`<span class="${i<=stepIdx?'active':''}"></span>`).join("");
+    // 新規登録処理 (新規登録 STEP2)
+    document.getElementById('formRegister').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('regEmail').value;
+      const pass = document.getElementById('regPassword').value;
+      const passConf = document.getElementById('regPasswordConfirm').value;
 
-  let body = "";
-  if(state.signupStep === "invite"){
-    body = `
-      <div class="auth-step-title"><i class="fa-solid fa-ticket"></i> 招待コードの入力</div>
-      <p class="hint" style="margin-bottom:14px;">現在は招待コードをお持ちの方のみ新規登録できます(6桁の数字)。</p>
-      <div class="field">
-        <input class="invite-code-input" id="su-code" maxlength="6" inputmode="numeric" placeholder="――――――" value="${esc(signupData.code)}">
-      </div>
-      <div class="error-text" id="su-error"></div>
-      <button class="btn btn-primary" style="width:100%;padding:13px;" onclick="signupCheckInvite()">次へ</button>
-    `;
-  }else if(state.signupStep === "email"){
-    body = `
-      <div class="auth-step-title"><i class="fa-solid fa-envelope"></i> メールアドレスの登録</div>
-      <div class="field"><input type="email" id="su-email" placeholder="you@example.com" value="${esc(signupData.email)}"></div>
-      <div class="error-text" id="su-error"></div>
-      <button class="btn btn-primary" style="width:100%;padding:13px;" onclick="signupCheckEmail()">次へ</button>
-    `;
-  }else if(state.signupStep === "password"){
-    body = `
-      <div class="auth-step-title"><i class="fa-solid fa-lock"></i> パスワードの設定</div>
-      <div class="field"><label>パスワード(8文字以上)</label><input type="password" id="su-pass1" placeholder="••••••••"></div>
-      <div class="field"><label>パスワード(確認用)</label><input type="password" id="su-pass2" placeholder="••••••••"></div>
-      <div class="error-text" id="su-error"></div>
-      <button class="btn btn-primary" style="width:100%;padding:13px;" onclick="signupFinish()">登録を完了する</button>
-    `;
-  }
+      if (pass !== passConf) {
+        alert("パスワードが一致しません。");
+        return;
+      }
 
-  return `
-  <div class="auth-screen">
-    <div class="auth-card">
-      <div class="auth-logo"><i class="fa-solid fa-hippo" style="color:var(--color-primary)"></i><span>Y-NoteQ</span></div>
-      <div class="auth-sub">新規登録</div>
-      <div class="auth-step-dots">${dots}</div>
-      ${body}
-      <div class="auth-links">
-        <button class="btn-ghost" onclick="signupBack()"><i class="fa-solid fa-arrow-left"></i> 戻る</button>
-        <button class="btn-ghost" style="text-decoration:underline;" onclick="state.route='login'; render();">ログインへ</button>
-      </div>
-    </div>
-  </div>`;
-}
-function bindSignup(){}
-function signupBack(){
-  const steps = REQUIRE_INVITE_CODE ? ["invite","email","password"] : ["email","password"];
-  const idx = steps.indexOf(state.signupStep);
-  if(idx<=0){ state.route="login"; render(); return; }
-  state.signupStep = steps[idx-1]; render();
-}
-async function signupCheckInvite(){
-  const code = $("#su-code").value.trim();
-  const errEl = $("#su-error");
-  if(!/^\d{6}$/.test(code)){ errEl.textContent = "招待コードは6桁の数字で入力してください。"; return; }
-  try{
-    const snap = await db.collection("inviteCodes").doc(code).get();
-    if(!snap.exists){ errEl.textContent = "招待コードが見つかりません。"; return; }
-    if(snap.data().used){ errEl.textContent = "この招待コードは既に使用されています。"; return; }
-    signupData.code = code;
-    errEl.textContent = "";
-    state.signupStep = "email"; render();
-  }catch(err){
-    errEl.textContent = "確認中にエラーが発生しました: " + err.message;
-  }
-}
-function signupCheckEmail(){
-  const email = $("#su-email").value.trim();
-  const errEl = $("#su-error");
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ errEl.textContent = "有効なメールアドレスを入力してください。"; return; }
-  signupData.email = email;
-  errEl.textContent = "";
-  state.signupStep = "password"; render();
-}
-async function signupFinish(){
-  const p1 = $("#su-pass1").value, p2 = $("#su-pass2").value;
-  const errEl = $("#su-error");
-  if(p1.length < 8){ errEl.textContent = "パスワードは8文字以上にしてください。"; return; }
-  if(p1 !== p2){ errEl.textContent = "パスワードが一致しません。"; return; }
-  try{
-    const cred = await auth.createUserWithEmailAndPassword(signupData.email, p1);
-    const profile = {username: signupData.email.split("@")[0], iconColor: randomAvatarColor()};
-    await userDocRef(cred.user.uid).set({profile, appData: defaultUserData(), createdAt: Date.now()});
-    if(REQUIRE_INVITE_CODE && signupData.code){
-      await db.collection("inviteCodes").doc(signupData.code).set({used:true, usedBy:cred.user.uid, usedAt:Date.now()}, {merge:true});
-    }
-    await auth.signOut();
-    signupData.code=""; signupData.email=""; 
-    state.route = "login"; state.signupStep = REQUIRE_INVITE_CODE?"invite":"email";
-    render();
-    toast("登録が完了しました");
-  }catch(err){
-    errEl.textContent = "登録に失敗しました: " + translateAuthError(err);
-  }
-}
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then(() => {
+          alert("登録が完了しました");
+          showScreen('screenLogin');
+        })
+        .catch(err => alert("登録エラー: " + err.message));
+    });
 
-/* ============================================================
-   アプリシェル
-   ============================================================ */
-const TABS = [
-  {key:"folder", label:"フォルダー", icon:"fa-folder-open"},
-  {key:"list",   label:"単語一覧", icon:"fa-list"},
-  {key:"test",   label:"テスト", icon:"fa-pen-to-square"},
-  {key:"edit",   label:"編集", icon:"fa-pen"},
-  {key:"share",  label:"共有", icon:"fa-share-nodes"},
-  {key:"account",label:"アカウント", icon:"fa-user", mobileOnly:true},
-];
-function renderAppShellHTML(){
-  const inWordbook = !!state.currentWordbookId;
-  const wb = inWordbook ? currentWordbook() : null;
-  const av = state.profile ? state.profile.iconColor : "#4A8FE7";
-  const un = state.profile ? state.profile.username : "";
+    // ログアウト
+    const handleLogout = () => auth.signOut();
+    document.getElementById('menuLogout').addEventListener('click', handleLogout);
+    document.getElementById('btnMobileLogout').addEventListener('click', handleLogout);
 
-  return `
-  <div class="app-shell">
-    <header class="app-header">
-      <div class="brand" onclick="goHome()">
-        <i class="fa-solid fa-hippo"></i><span>Y-NoteQ</span>
-      </div>
-      <div class="header-actions">
-        <div class="desktop-only" style="display:flex;align-items:center;gap:2px;">
-          <button class="btn-icon" title="戻る" onclick="goBack()"><i class="fa-solid fa-arrow-rotate-left"></i></button>
-          <button class="btn-icon" title="使い方" onclick="openModal('usage')"><i class="fa-regular fa-circle-question"></i></button>
-          <button class="btn-icon" title="パッチノート" onclick="openModal('patch')"><i class="fa-solid fa-clock-rotate-left"></i></button>
-          <div style="position:relative;">
-            <button class="btn-icon" title="音量" onclick="event.stopPropagation();toggleVolumePop()"><i class="fa-solid fa-volume-high"></i></button>
-            ${state._volOpen ? renderVolumePop() : ""}
-          </div>
-          <button class="btn-icon" title="テーマ切り替え" onclick="cycleTheme()">
-            <i class="fa-solid ${state.theme==='dark'?'fa-moon':state.theme==='light'?'fa-sun':'fa-circle-half-stroke'}"></i>
-          </button>
-          <div class="divider"></div>
-          <div style="position:relative;">
-            <div class="account-avatar" style="background:${av};cursor:pointer;" onclick="event.stopPropagation();toggleAccountMenu()">${initials(un)}</div>
-            ${state.accountMenuOpen ? renderAccountMenu() : ""}
-          </div>
-        </div>
-        <button class="btn-icon header-hamburger" onclick="state.mobileMenuOpen=true; render();"><i class="fa-solid fa-bars"></i></button>
-      </div>
-    </header>
+    /* ==========================================================================
+       UI 制御・タブ切替・ヘッダー
+       ========================================================================== */
+    // アカウントドロップダウン
+    document.getElementById('avatarBtn').addEventListener('click', () => {
+      document.getElementById('avatarDropdown').classList.toggle('show');
+    });
 
-    ${inWordbook ? `<div class="wordbook-title-bar"><i class="fa-solid fa-book-bookmark"></i> ${esc(wb?wb.name:"")}</div>` : ""}
+    // テーマ切り替え (ライト/ダーク)
+    document.getElementById('btnThemeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+    });
 
-    ${inWordbook ? `
-    <nav class="tabbar">
-      ${TABS.filter(t=>!t.mobileOnly).map(t=>`<button class="${state.currentTab===t.key?'active':''}" onclick="switchTab('${t.key}')"><i class="fa-solid ${t.icon}"></i>${t.label}</button>`).join("")}
-    </nav>` : ""}
+    // ヘッダーヘルプ
+    document.getElementById('btnHelp').addEventListener('click', () => {
+      document.getElementById('modalHelp').style.display = 'flex';
+    });
 
-    <main class="main-content">
-      ${inWordbook ? renderWordbookTab() : renderHomeView()}
-    </main>
+    // タブ切り替え
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        btn.classList.add('active');
+        const targetTab = btn.getAttribute('data-tab');
+        document.getElementById(targetTab).style.display = 'block';
 
-    <footer class="app-footer">
-      Y-NoteQ — 単語の暗記度管理アプリ ${state.data?`<span style="opacity:.6">(v0.1.0)</span>`:""}
-    </footer>
-
-    ${inWordbook ? `
-    <nav class="bottom-tabbar"><div class="row">
-      ${TABS.map(t=>`<button class="${state.currentTab===t.key?'active':''}" onclick="switchTab('${t.key}')"><i class="fa-solid ${t.icon}"></i>${t.label}</button>`).join("")}
-    </div></nav>` : ""}
-  </div>
-
-  ${state.mobileMenuOpen ? renderMobileMenu() : ""}
-  ${state.modal ? renderModal() : ""}
-  `;
-}
-function renderVolumePop(){
-  return `<div class="volume-pop" onclick="event.stopPropagation()">
-    <div class="hint" style="margin-bottom:8px;">音量</div>
-    <input type="range" min="0" max="100" value="${state._vol==null?70:state._vol}" style="width:100%;" oninput="state._vol=this.value">
-  </div>`;
-}
-function toggleVolumePop(){ state._volOpen = !state._volOpen; state.accountMenuOpen=false; render(); }
-function renderAccountMenu(){
-  return `<div class="account-menu" onclick="event.stopPropagation()">
-    <button onclick="accountMenuGoProfile()"><i class="fa-solid fa-id-badge"></i> プロフィール</button>
-    <button onclick="openModal('bug')"><i class="fa-solid fa-bug"></i> バグを報告</button>
-    <button onclick="doLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> ログアウト</button>
-  </div>`;
-}
-function accountMenuGoProfile(){
-  state.accountMenuOpen=false;
-  if(state.currentWordbookId){ switchTab("account"); }
-  else{ openModal("profile-standalone"); render(); }
-}
-function toggleAccountMenu(){ state.accountMenuOpen = !state.accountMenuOpen; state._volOpen=false; render(); }
-document.addEventListener("click", ()=>{ if(state.accountMenuOpen||state._volOpen){ state.accountMenuOpen=false; state._volOpen=false; render(); } });
-function renderMobileMenu(){
-  return `<div class="mobile-menu-panel">
-    <div class="backdrop" onclick="state.mobileMenuOpen=false; render();"></div>
-    <div class="panel">
-      <div class="account-avatar" style="background:${state.profile?.iconColor||'#4A8FE7'};margin-bottom:10px;">${initials(state.profile?.username)}</div>
-      <div style="font-weight:700;margin-bottom:14px;">${esc(state.profile?.username)}</div>
-      <button onclick="goBack(); state.mobileMenuOpen=false;"><i class="fa-solid fa-arrow-rotate-left"></i> 戻る</button>
-      <button onclick="openModal('usage'); state.mobileMenuOpen=false;"><i class="fa-regular fa-circle-question"></i> 使い方</button>
-      <button onclick="openModal('patch'); state.mobileMenuOpen=false;"><i class="fa-solid fa-clock-rotate-left"></i> パッチノート</button>
-      <button onclick="cycleTheme();"><i class="fa-solid fa-circle-half-stroke"></i> ライト/ダーク切替(${state.theme})</button>
-      <button onclick="openModal('bug'); state.mobileMenuOpen=false;"><i class="fa-solid fa-bug"></i> バグを報告</button>
-      <button onclick="doLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> ログアウト</button>
-    </div>
-  </div>`;
-}
-function doLogout(){ auth.signOut(); toast("ログアウトしました"); }
-function goHome(){ pushHistory(); state.currentFolderId=null; state.currentWordbookId=null; render(); }
-function switchTab(key){ pushHistory(); state.currentTab = key; render(); }
-function bindAppShell(){}
-
-/* ============================================================
-   ホーム画面
-   ============================================================ */
-const TILE_COLORS = ["#4A8FE7","#4FAE5C","#E8843D","#DC5A50","#9B6BC8","#2FB2B2","#E0A72D","#7C7C86"];
-function renderHomeView(){
-  const folders = state.data?.folders || [];
-  if(!state.currentFolderId){
-    return `
-    <div class="section-head"><h2><i class="fa-solid fa-folder-open"></i> フォルダー</h2></div>
-    ${folders.length===0 ? `<div class="empty-note">まだフォルダーがありません。「新規フォルダー」から作成しましょう。</div>` : `
-    <div class="grid-cards">
-      ${folders.map(f=>`
-        <div class="tile" style="background:${f.color}" onclick="openFolder('${f.id}')">
-          <div class="tile-actions" onclick="event.stopPropagation()">
-            <button title="編集" onclick="editFolderModal('${f.id}')"><i class="fa-solid fa-pen"></i></button>
-            <button title="削除" onclick="confirmDelete('folder','${f.id}')"><i class="fa-solid fa-trash"></i></button>
-          </div>
-          <i class="fa-solid fa-folder tile-icon"></i>
-          <div>
-            <div class="tile-name">${esc(f.name)}</div>
-            <div class="tile-count">${(f.wordbooks||[]).length} 冊の単語帳</div>
-          </div>
-        </div>`).join("")}
-      <button class="tile-add" onclick="editFolderModal(null)"><i class="fa-solid fa-plus" style="font-size:20px;"></i>新規フォルダー</button>
-    </div>`}
-    `;
-  }
-  const folder = getFolder(state.currentFolderId);
-  if(!folder){ return `<div class="empty-note">フォルダーが見つかりません。</div>`; }
-  const books = folder.wordbooks || [];
-  return `
-  <div class="section-head">
-    <h2><i class="fa-solid fa-folder" style="color:${folder.color}"></i> ${esc(folder.name)}</h2>
-    <button class="btn btn-outline btn-sm" onclick="state.currentFolderId=null; render();"><i class="fa-solid fa-arrow-left"></i> フォルダー一覧</button>
-  </div>
-  ${books.length===0 ? `<div class="empty-note">単語帳がありません。「新規単語帳」を追加しましょう。</div>` : `
-  <div class="grid-cards">
-    ${books.map(b=>`
-      <div class="tile" style="background:${b.color}" onclick="openWordbook('${folder.id}','${b.id}')">
-        <div class="tile-actions" onclick="event.stopPropagation()">
-          <button title="編集" onclick="editWordbookModal('${folder.id}','${b.id}')"><i class="fa-solid fa-pen"></i></button>
-          <button title="削除" onclick="confirmDelete('wordbook','${folder.id}|${b.id}')"><i class="fa-solid fa-trash"></i></button>
-        </div>
-        <i class="fa-solid fa-book tile-icon"></i>
-        <div>
-          <div class="tile-name">${esc(b.name)}</div>
-          <div class="tile-count">${(b.words||[]).length} 語</div>
-        </div>
-      </div>`).join("")}
-    <button class="tile-add" onclick="editWordbookModal(null,null)"><i class="fa-solid fa-plus" style="font-size:20px;"></i>新規単語帳</button>
-  </div>`}
-  `;
-}
-function openFolder(id){ pushHistory(); state.currentFolderId = id; render(); }
-function openWordbook(fid, wid){ pushHistory(); state.currentFolderId=fid; state.currentWordbookId=wid; state.currentTab="list"; render(); }
-
-function editFolderModal(id){
-  const f = id ? getFolder(id) : {id:null, name:"", color: TILE_COLORS[0]};
-  state.modal = {type:"folder-edit", data:{...f}};
-  render();
-}
-function editWordbookModal(fid, wid){
-  const folderId = fid || state.currentFolderId;
-  const w = wid ? getWordbook(folderId, wid) : {id:null, name:"", color: TILE_COLORS[1]};
-  state.modal = {type:"wordbook-edit", data:{...w, folderId}};
-  render();
-}
-function saveFolderFromModal(){
-  const d = state.modal.data;
-  const name = $("#mf-name").value.trim();
-  if(!name){ toast("フォルダー名を入力してください"); return; }
-  if(!state.data.folders) state.data.folders = [];
-  if(d.id){
-    const f = getFolder(d.id); f.name = name; f.color = d.color;
-  }else{
-    state.data.folders.push({id: uid(), name, color: d.color, wordbooks: []});
-  }
-  scheduleSave(); closeModal(); render();
-}
-function saveWordbookFromModal(){
-  const d = state.modal.data;
-  const name = $("#mw-name").value.trim();
-  if(!name){ toast("単語帳名を入力してください"); return; }
-  const folder = getFolder(d.folderId);
-  if(!folder.wordbooks) folder.wordbooks = [];
-  if(d.id){
-    const w = getWordbook(d.folderId, d.id); w.name = name; w.color = d.color;
-  }else{
-    folder.wordbooks.push({id: uid(), name, color: d.color, words: []});
-  }
-  scheduleSave(); closeModal(); render();
-}
-function confirmDelete(kind, payload){
-  state.modal = {type:"confirm-delete", kind, payload};
-  render();
-}
-function performDelete(){
-  const {kind, payload} = state.modal;
-  if(kind === "folder"){
-    state.data.folders = state.data.folders.filter(f=>f.id!==payload);
-    if(state.currentFolderId===payload) state.currentFolderId=null;
-  }else if(kind === "wordbook"){
-    const [fid, wid] = payload.split("|");
-    const f = getFolder(fid); if(f) f.wordbooks = f.wordbooks.filter(w=>w.id!==wid);
-    if(state.currentWordbookId===wid){ state.currentWordbookId=null; }
-  }else if(kind === "word"){
-    const wb = currentWordbook(); if(wb) wb.words = wb.words.filter(w=>w.no!==Number(payload));
-  }
-  scheduleSave(); closeModal(); render(); toast("削除しました");
-}
-
-/* モーダル表示 */
-function openModal(type, extra){ state.modal = {type, ...(extra||{})}; render(); }
-function closeModal(){ state.modal = null; render(); }
-function colorPicker(selected, onPickFnName){
-  return `<div class="color-dot-row">${TILE_COLORS.map(c=>`<div class="color-dot ${selected===c?'selected':''}" style="background:${c}" onclick="${onPickFnName}('${c}')"></div>`).join("")}</div>`;
-}
-function renderModal(){
-  const m = state.modal;
-  let inner = "";
-  if(m.type === "folder-edit"){
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-folder"></i> ${m.data.id?'フォルダーを編集':'新規フォルダー'}</div>
-      <div class="field"><label>フォルダー名</label><input id="mf-name" value="${esc(m.data.name)}" placeholder="例: TOEIC単語帳"></div>
-      <label class="hint">カラー</label>
-      ${colorPicker(m.data.color, "pickFolderColor")}
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">キャンセル</button><button class="btn btn-primary" onclick="saveFolderFromModal()">保存</button></div>
-    `;
-  }else if(m.type === "wordbook-edit"){
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-book"></i> ${m.data.id?'単語帳を編集':'新規単語帳'}</div>
-      <div class="field"><label>単語帳名</label><input id="mw-name" value="${esc(m.data.name)}" placeholder="例: Unit 1-5"></div>
-      <label class="hint">カラー</label>
-      ${colorPicker(m.data.color, "pickWordbookColor")}
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">キャンセル</button><button class="btn btn-primary" onclick="saveWordbookFromModal()">保存</button></div>
-    `;
-  }else if(m.type === "confirm-delete"){
-    const label = m.kind==="folder"?"フォルダー":m.kind==="wordbook"?"単語帳":"単語";
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--color-danger)"></i> 削除の確認</div>
-      <p>この${label}を削除します。この操作は取り消せません。よろしいですか?</p>
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">キャンセル</button><button class="btn btn-danger" onclick="performDelete()">削除する</button></div>
-    `;
-  }else if(m.type === "usage"){
-    inner = `
-      <div class="modal-title"><i class="fa-regular fa-circle-question"></i> 使い方</div>
-      <div class="usage-row"><b>フォルダー</b><span>複数の単語帳をフォルダーでまとめて管理できます。</span></div>
-      <div class="usage-row"><b>単語一覧</b><span>暗記度(Lv0〜6)の一覧確認や検索・PDF/CSV出力ができます。</span></div>
-      <div class="usage-row"><b>テスト</b><span>出題範囲・形式を設定してテストを行えます。結果に応じて暗記度が自動更新されます。</span></div>
-      <div class="usage-row"><b>編集</b><span>単語の直接追加・修正・削除・一括設定・CSVインポートが可能です。</span></div>
-      <div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">閉じる</button></div>
-    `;
-  }else if(m.type === "patch"){
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-clock-rotate-left"></i> パッチノート</div>
-      <div class="patch-entry"><span class="ver">Ver: 0.1.0</span><span class="date">更新日時: ${todayStr()}</span>
-        <ul><li>Y-NoteQ 初回リリース</li><li>新規登録・単語修正機能・各種テスト機能を完備</li></ul>
-      </div>
-      <div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">閉じる</button></div>
-    `;
-  }else if(m.type === "bug"){
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-bug"></i> バグを報告</div>
-      <div class="field"><label>内容</label><textarea id="bug-text" rows="4" placeholder="不具合の内容を入力..."></textarea></div>
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">閉じる</button><button class="btn btn-primary" onclick="toast('ご報告ありがとうございます'); closeModal();">送信</button></div>
-    `;
-  }else if(m.type === "word-detail"){
-    const w = m.word;
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-circle-info"></i> 単語の詳細</div>
-      <div class="field"><label>単語No.</label><input value="${pad4(w.no)}" disabled></div>
-      <div class="field"><label>単語</label><input value="${esc(w.word)}" disabled></div>
-      <div class="field"><label>意味</label><input value="${esc(w.meaning)}" disabled></div>
-      <div class="field"><label>実施日</label><input value="${w.date||'未実施'}" disabled></div>
-      <div class="field"><label>暗記度</label><span class="lv-chip" style="background:${levelInfo(w.level).css};color:${levelInfo(w.level).text}">${levelInfo(w.level).label}</span></div>
-      <div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">閉じる</button></div>
-    `;
-  }else if(m.type === "level-pick"){
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-layer-group"></i> 暗記度を設定</div>
-      <div class="level-pill-row">
-        ${[1,2,3,4,5,6].map(v=>`<span class="level-pill selected" style="background:${levelInfo(v).css};color:${levelInfo(v).text}" onclick="setWordLevel(${m.wordNo}, ${v})">${levelInfo(v).label}</span>`).join("")}
-      </div>
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">キャンセル</button></div>
-    `;
-  }else if(m.type === "csv-format"){
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-file-csv"></i> CSVフォーマット</div>
-      <div class="csv-format-box">
-        1列目: 単語No ／ 2列目: 単語 ／ 3列目: 意味 ／ 4列目: 暗記度(0〜6)<br>
-        1行目はヘッダー行として扱われます。
-      </div>
-      <div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">閉じる</button></div>
-    `;
-  }else if(m.type === "word-edit-form"){
-    const w = m.word;
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-pen"></i> 単語を修正</div>
-      <div class="field"><label>単語No(順番)</label><input type="number" id="mwf-no" value="${w.no}"></div>
-      <div class="field"><label>単語</label><input id="mwf-word" value="${esc(w.word)}"></div>
-      <div class="field"><label>意味</label><input id="mwf-meaning" value="${esc(w.meaning)}"></div>
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">キャンセル</button><button class="btn btn-primary" onclick="saveWordEdit(${w.no})">保存</button></div>
-    `;
-  }else if(m.type === "profile-standalone"){
-    inner = renderAccountTabInner(true);
-  }else if(m.type === "abort-test-confirm"){
-    inner = `
-      <div class="modal-title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--color-danger)"></i> テストを中断しますか?</div>
-      <p>中断すると、このテストの内容は記録されません。</p>
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">続ける</button><button class="btn btn-danger" onclick="abortTestConfirmed()">中断する</button></div>
-    `;
-  }
-  return `<div class="modal-overlay" onclick="if(event.target===this) closeModal();"><div class="modal-box ${m.type==='profile-standalone'?'wide':''}">${inner}</div></div>`;
-}
-function pickFolderColor(c){ state.modal.data.color = c; render(); }
-function pickWordbookColor(c){ state.modal.data.color = c; render(); }
-
-/* ============================================================
-   単語帳タブ ディスパッチャ
-   ============================================================ */
-function renderWordbookTab(){
-  const wb = currentWordbook();
-  if(!wb) return `<div class="empty-note">単語帳が見つかりません。</div>`;
-  switch(state.currentTab){
-    case "folder": state.currentTab="list";
-    case "list": return renderListTab(wb);
-    case "test": return renderTestTab(wb);
-    case "edit": return renderEditTab(wb);
-    case "share": return renderShareTab(wb);
-    case "account": return renderAccountTabInner(false);
-    default: return renderListTab(wb);
-  }
-}
-
-/* ============================================================
-   単語一覧タブ
-   ============================================================ */
-if(!state.listFilters){
-  state.listFilters = { analyticsFrom:"", analyticsTo:"", excludeUnimplemented:false, fNo:"", fWord:"", fMeaning:"", fLevel:"", fDate:"" };
-}
-function parseNoSpec(spec){
-  spec = String(spec||"").trim();
-  if(!spec) return null;
-  const parts = spec.split(",").map(s=>s.trim()).filter(Boolean);
-  const ranges = []; const singles = new Set();
-  parts.forEach(p=>{
-    const m = p.match(/^(\d+)\s*[-~]\s*(\d+)$/);
-    if(m){ ranges.push([Number(m[1]), Number(m[2])]); }
-    else if(/^\d+$/.test(p)){ singles.add(Number(p)); }
-  });
-  return (no)=> singles.has(no) || ranges.some(([a,b])=> no>=Math.min(a,b) && no<=Math.max(a,b));
-}
-function filteredWords(wb, filters){
-  const words = wb.words || [];
-  const noCheck = parseNoSpec(filters.fNo);
-  return words.filter(w=>{
-    if(noCheck && !noCheck(w.no)) return false;
-    if(filters.fWord && !String(w.word).toLowerCase().includes(filters.fWord.toLowerCase())) return false;
-    if(filters.fMeaning && !String(w.meaning).toLowerCase().includes(filters.fMeaning.toLowerCase())) return false;
-    if(filters.fLevel !== "" && filters.fLevel !== undefined && String(w.level) !== String(filters.fLevel)) return false;
-    if(filters.fDate && (w.date||"") !== filters.fDate.replaceAll("-","/")) return false;
-    return true;
-  }).sort((a,b)=>a.no-b.no);
-}
-
-function renderListTab(wb){
-  const f = state.listFilters;
-  let analyticsWords = (wb.words||[]);
-  if(f.analyticsFrom || f.analyticsTo){
-    const from = Number(f.analyticsFrom)||0, to = Number(f.analyticsTo)||Infinity;
-    analyticsWords = analyticsWords.filter(w=>w.no>=from && w.no<=to);
-  }
-  const counts = [0,0,0,0,0,0,0];
-  analyticsWords.forEach(w=> counts[w.level]++ );
-  const order = f.excludeUnimplemented ? [1,2,3,4,5,6] : [1,2,3,4,5,6,0];
-  const total = order.reduce((s,lv)=>s+counts[lv],0) || 1;
-
-  const rows = filteredWords(wb, f);
-
-  return `
-  <div class="card analytics-box">
-    <h3 style="font-size:14px;margin-bottom:2px;"><i class="fa-solid fa-chart-simple"></i> アナリティクス</h3>
-    <div class="analytics-bar">
-      ${order.map(lv=>{
-        const c = counts[lv]; const pct = (c/total*100);
-        if(pct<=0) return "";
-        return `<div class="seg" style="width:${pct}%;background:${levelInfo(lv).css};color:${levelInfo(lv).text}" title="${levelInfo(lv).label}: ${pct.toFixed(1)}% / ${c}語">${pct>=8?pct.toFixed(0)+"%":""}</div>`;
-      }).join("")}
-    </div>
-    <div class="analytics-legend">
-      ${order.map(lv=>`<div class="item"><span class="sw" style="background:${levelInfo(lv).css}"></span>${levelInfo(lv).label}: ${(counts[lv]/total*100).toFixed(1)}% | ${counts[lv]}語</div>`).join("")}
-    </div>
-    <div class="analytics-controls">
-      <div class="field"><label>対象範囲 開始</label><input type="number" value="${f.analyticsFrom}" oninput="state.listFilters.analyticsFrom=this.value; rerenderListTab();" placeholder="0001"></div>
-      <div class="field"><label>対象範囲 終了</label><input type="number" value="${f.analyticsTo}" oninput="state.listFilters.analyticsTo=this.value; rerenderListTab();" placeholder="0005"></div>
-      <label class="check-row"><input type="checkbox" ${f.excludeUnimplemented?'checked':''} onchange="state.listFilters.excludeUnimplemented=this.checked; rerenderListTab();"> 未実施を除く</label>
-    </div>
-  </div>
-
-  <div class="card" style="padding:16px 18px;margin-top:16px;">
-    <h3 style="font-size:14px;margin-bottom:12px;"><i class="fa-solid fa-magnifying-glass"></i> 検索フィルター</h3>
-    <div class="filter-box">
-      <div class="field"><label>単語No</label><input value="${esc(f.fNo)}" oninput="state.listFilters.fNo=this.value; rerenderListTab();"></div>
-      <div class="field"><label>単語</label><input value="${esc(f.fWord)}" oninput="state.listFilters.fWord=this.value; rerenderListTab();"></div>
-      <div class="field"><label>意味</label><input value="${esc(f.fMeaning)}" oninput="state.listFilters.fMeaning=this.value; rerenderListTab();"></div>
-      <div class="field"><label>暗記度</label>
-        <select onchange="state.listFilters.fLevel=this.value; rerenderListTab();">
-          <option value="">すべて</option>
-          ${[0,1,2,3,4,5,6].map(v=>`<option value="${v}" ${String(f.fLevel)===String(v)?'selected':''}>${levelInfo(v).label}</option>`).join("")}
-        </select>
-      </div>
-      <div class="field"><label>実施日</label><input type="date" onchange="state.listFilters.fDate=this.value; rerenderListTab();"></div>
-    </div>
-    <button class="btn btn-outline btn-sm" onclick="state.listFilters={analyticsFrom:'',analyticsTo:'',excludeUnimplemented:false,fNo:'',fWord:'',fMeaning:'',fLevel:'',fDate:''}; rerenderListTab();"><i class="fa-solid fa-eraser"></i> クリア</button>
-  </div>
-
-  <div class="export-row">
-    <button class="btn btn-outline btn-sm" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> CSV出力</button>
-    <button class="btn btn-outline btn-sm" onclick="exportListPDF()"><i class="fa-solid fa-file-pdf"></i> PDF印刷/保存</button>
-  </div>
-
-  <div class="table-wrap">
-    <table class="word-table">
-      <thead><tr><th>単語No.</th><th>単語</th><th>意味</th><th>実施日</th><th>暗記度</th><th>操作</th></tr></thead>
-      <tbody>
-        ${rows.length===0 ? `<tr><td colspan="6" class="empty-note">該当する単語がありません</td></tr>` : rows.map(w=>`
-        <tr>
-          <td class="no-cell">${pad4(w.no)}</td>
-          <td>${esc(w.word)}</td>
-          <td>${esc(w.meaning)}</td>
-          <td>${w.level===0 ? `<span class="unimplemented-chip">未実施</span>` : esc(w.date||"-")}</td>
-          <td><button class="lv-chip" style="background:${levelInfo(w.level).css};color:${levelInfo(w.level).text}" onclick="openModal('level-pick',{wordNo:${w.no}})">${w.level}</button></td>
-          <td class="row-actions">
-            <button class="btn btn-outline btn-sm" onclick="showWordDetail(${w.no})">詳細</button>
-            <button class="btn btn-outline btn-sm" onclick="resetWordLevel(${w.no})">リセット</button>
-          </td>
-        </tr>`).join("")}
-      </tbody>
-    </table>
-  </div>
-  `;
-}
-function rerenderListTab(){ $(".main-content").innerHTML = renderWordbookTab(); }
-function showWordDetail(no){ const wb=currentWordbook(); const w=wb.words.find(x=>x.no===no); openModal("word-detail",{word:w}); }
-function setWordLevel(no, lv){
-  const wb = currentWordbook(); const w = wb.words.find(x=>x.no===no);
-  if(w){ w.level = lv; w.date = todayStr(); scheduleSave(); closeModal(); render(); toast(`単語No.${pad4(no)} を Lv${lv} に設定しました`); }
-}
-function resetWordLevel(no){
-  const wb = currentWordbook(); const w = wb.words.find(x=>x.no===no);
-  if(w){ w.level = 0; w.date = ""; scheduleSave(); render(); toast(`単語No.${pad4(no)} をリセットしました`); }
-}
-
-/* エクスポート・インポート */
-function exportCSV(){
-  const wb = currentWordbook();
-  const rows = [["単語No","単語","意味","暗記度","実施日"]];
-  (wb.words||[]).sort((a,b)=>a.no-b.no).forEach(w=> rows.push([pad4(w.no), w.word, w.meaning, w.level, w.date||""]));
-  const csv = rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\r\n");
-  const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8;"});
-  downloadBlob(blob, `${wb.name}_単語一覧.csv`);
-}
-function downloadBlob(blob, filename){
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 2000);
-}
-function exportListPDF(){
-  const wb = currentWordbook();
-  const rows = (wb.words||[]).sort((a,b)=>a.no-b.no);
-  printHTML(`
-    <h1>${esc(wb.name)} - 単語一覧</h1>
-    <table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:13px;">
-      <tr style="background:#eee;"><th>単語No</th><th>単語</th><th>意味</th><th>暗記度</th><th>実施日</th></tr>
-      ${rows.map(w=>`<tr><td>${pad4(w.no)}</td><td>${esc(w.word)}</td><td>${esc(w.meaning)}</td><td>Lv${w.level}</td><td>${w.date||"未実施"}</td></tr>`).join("")}
-    </table>`);
-}
-function printHTML(bodyHtml){
-  const win = window.open("", "_blank");
-  win.document.write(`<html><head><meta charset="UTF-8"><title>Y-NoteQ PDF出力</title>
-    <style>body{font-family:'Noto Sans JP',sans-serif;padding:24px;} table{width:100%;} h1{font-size:18px;}</style>
-    </head><body>${bodyHtml}<script>window.onload=()=>{window.print();}<\/script></body></html>`);
-  win.document.close();
-}
-function importCSVFile(input){
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e)=>{
-    try{
-      const text = e.target.result.replace(/^\uFEFF/, "");
-      const lines = text.split(/\r?\n/).filter(l=>l.trim().length>0);
-      const wb = currentWordbook();
-      if(!wb.words) wb.words = [];
-      let added = 0;
-      lines.slice(1).forEach(line=>{
-        const cols = parseCSVLine(line);
-        if(cols.length < 2) return;
-        const no = Number(cols[0]) || (wb.words.length>0 ? Math.max(...wb.words.map(w=>w.no))+1 : 1);
-        const word = cols[1] || ""; const meaning = cols[2] || ""; const level = Math.max(0, Math.min(6, Number(cols[3])||0));
-        const existingIdx = wb.words.findIndex(w=>w.no===no);
-        const rec = {no, word, meaning, level, date: level>0 ? todayStr() : ""};
-        if(existingIdx>=0) wb.words[existingIdx] = rec; else wb.words.push(rec);
-        added++;
+        // タイトル表示制御 (フォルダー以外のタブ表示時は単語帳名を表示)
+        const deckTitle = document.getElementById('deckTitleContainer');
+        if (targetTab !== 'tabFolder') {
+          deckTitle.style.display = 'flex';
+          document.getElementById('currentDeckName').innerText = currentDeck.name;
+        } else {
+          deckTitle.style.display = 'none';
+        }
       });
-      scheduleSave(); render(); toast(`${added}件の単語をインポートしました`);
-    }catch(err){ toast("CSVの読み込みに失敗しました: "+err.message); }
-    input.value = "";
-  };
-  reader.readAsText(file, "UTF-8");
-}
-function parseCSVLine(line){
-  const out = []; let cur=""; let inQ=false;
-  for(let i=0;i<line.length;i++){
-    const c = line[i];
-    if(inQ){
-      if(c==='"' && line[i+1]==='"'){ cur+='"'; i++; }
-      else if(c==='"'){ inQ=false; }
-      else cur+=c;
-    }else{
-      if(c==='"') inQ=true;
-      else if(c===','){ out.push(cur); cur=""; }
-      else cur+=c;
+    });
+
+    /* ==========================================================================
+       単語一覧 & アナリティクス描画
+       ========================================================================== */
+    function renderWordTable() {
+      const tbody = document.getElementById('wordTableBody');
+      tbody.innerHTML = '';
+
+      currentDeck.words.forEach(w => {
+        const tr = document.createElement('tr');
+        const noFormatted = String(w.no).padStart(4, '0');
+        const dateDisplay = w.lvl === 0 ? `<span class="badge-lvl lvl-0">未実施</span>` : (w.date || '未記録');
+
+        tr.innerHTML = `
+          <td class="num-font">${noFormatted}</td>
+          <td>${w.word}</td>
+          <td>${w.def}</td>
+          <td>${dateDisplay}</td>
+          <td><span class="badge-lvl lvl-${w.lvl}">Level ${w.lvl}</span></td>
+          <td>
+            <button onclick="resetWordLvl(${w.no})" style="padding: 0.2rem 0.5rem; cursor:pointer;">リセット</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
-  }
-  out.push(cur);
-  return out.map(s=>s.trim());
-}
 
-/* ============================================================
-   編集タブ
-   ============================================================ */
-if(!state.editState){ state.editState = { newWord:"", newMeaning:"", newLevel:0, bulkSpec:"", bulkLevel:"0" }; }
-function renderEditTab(wb){
-  const e = state.editState;
-  const words = (wb.words||[]).sort((a,b)=>a.no-b.no);
-  return `
-  <div class="edit-grid">
-    <div class="card" style="padding:18px;">
-      <h3 style="font-size:14px;margin-bottom:14px;"><i class="fa-solid fa-square-plus"></i> 単語を直接追加</h3>
-      <div class="field"><label>単語</label><input id="ew-word" value="${esc(e.newWord)}" placeholder="例: apple"></div>
-      <div class="field"><label>意味</label><input id="ew-meaning" value="${esc(e.newMeaning)}" placeholder="例: りんご"></div>
-      <div class="field"><label>登録時の暗記度</label>
-        <select id="ew-level">${[0,1,2,3,4,5,6].map(v=>`<option value="${v}" ${e.newLevel==v?'selected':''}>${levelInfo(v).label}</option>`).join("")}</select>
-      </div>
-      <button class="btn btn-primary" onclick="addWordDirect()"><i class="fa-solid fa-plus"></i> 追加</button>
-
-      <h3 style="font-size:14px;margin:22px 0 10px;"><i class="fa-solid fa-file-import"></i> CSV / Excelインポート</h3>
-      <div class="import-drop">
-        <i class="fa-solid fa-file-arrow-up" style="font-size:22px;margin-bottom:8px;"></i><br>
-        <input type="file" accept=".csv" onchange="importCSVFile(this)">
-        <div style="margin-top:8px;"><button class="btn-ghost" style="text-decoration:underline;font-size:12px;" onclick="openModal('csv-format')">CSVフォーマットを確認</button></div>
-      </div>
-    </div>
-
-    <div class="card bulk-box">
-      <h3 style="font-size:14px;margin-bottom:12px;"><i class="fa-solid fa-layer-group"></i> 一括操作</h3>
-      <div class="row">
-        <div class="field" style="flex:1;min-width:160px;"><label>対象(単語No, 例 1-10 / 1,3,5)</label><input id="bulk-spec" value="${esc(e.bulkSpec)}"></div>
-        <div class="field"><label>設定する暗記度</label>
-          <select id="bulk-level">${[0,1,2,3,4,5,6].map(v=>`<option value="${v}">${levelInfo(v).label}</option>`).join("")}</select>
-        </div>
-      </div>
-      <div class="row" style="margin-top:8px;">
-        <button class="btn btn-outline btn-sm" onclick="bulkSetLevel()"><i class="fa-solid fa-layer-group"></i> 一括変更</button>
-        <button class="btn btn-danger btn-sm" onclick="bulkDelete()"><i class="fa-solid fa-trash"></i> 一括削除</button>
-      </div>
-
-      <h3 style="font-size:14px;margin:22px 0 10px;"><i class="fa-solid fa-list-check"></i> 単語一覧(修正・削除)</h3>
-      <div class="table-wrap" style="max-height:420px;overflow-y:auto;">
-        <table class="word-table">
-          <thead><tr><th>No</th><th>単語</th><th>意味</th><th>Lv</th><th>操作</th></tr></thead>
-          <tbody>
-          ${words.length===0?`<tr><td colspan="5" class="empty-note">単語がまだありません</td></tr>`:words.map(w=>`
-            <tr>
-              <td class="no-cell">${pad4(w.no)}</td>
-              <td>${esc(w.word)}</td>
-              <td>${esc(w.meaning)}</td>
-              <td><span class="lv-chip" style="background:${levelInfo(w.level).css};color:${levelInfo(w.level).text}">${w.level}</span></td>
-              <td class="row-actions">
-                <button class="btn btn-outline btn-sm" onclick="editWordModal(${w.no})">修正</button>
-                <button class="btn btn-outline btn-sm" onclick="resetWordLevel(${w.no}); rerenderListTab_edit();">リセット</button>
-                <button class="btn btn-danger btn-sm" onclick="confirmDelete('word', ${w.no})">削除</button>
-              </td>
-            </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  `;
-}
-function rerenderListTab_edit(){ $(".main-content").innerHTML = renderWordbookTab(); }
-function addWordDirect(){
-  const wb = currentWordbook();
-  const word = $("#ew-word").value.trim(); const meaning = $("#ew-meaning").value.trim();
-  const level = Number($("#ew-level").value);
-  if(!word){ toast("単語を入力してください"); return; }
-  if(!wb.words) wb.words = [];
-  const no = wb.words.length>0 ? Math.max(...wb.words.map(w=>w.no))+1 : 1;
-  wb.words.push({no, word, meaning, level, date: level>0?todayStr():""});
-  state.editState.newWord=""; state.editState.newMeaning=""; state.editState.newLevel=0;
-  scheduleSave(); render(); toast("単語を追加しました");
-}
-function editWordModal(no){
-  const wb = currentWordbook(); const w = wb.words.find(x=>x.no===no);
-  state.modal = {type:"word-edit-form", word: {...w}};
-  render();
-}
-function saveWordEdit(oldNo){
-  const wb = currentWordbook();
-  const newNo = Number($("#mwf-no").value);
-  const word = $("#mwf-word").value.trim();
-  const meaning = $("#mwf-meaning").value.trim();
-  if(!word){ toast("単語名を入力してください"); return; }
-  const target = wb.words.find(x=>x.no===oldNo);
-  if(target){
-    target.no = newNo; target.word = word; target.meaning = meaning;
-    scheduleSave(); closeModal(); render(); toast("単語を修正しました");
-  }
-}
-function bulkSetLevel(){
-  const wb = currentWordbook();
-  const check = parseNoSpec($("#bulk-spec").value);
-  const lv = Number($("#bulk-level").value);
-  if(!check){ toast("対象の単語Noを入力してください"); return; }
-  let n=0;
-  (wb.words||[]).forEach(w=>{ if(check(w.no)){ w.level=lv; w.date = lv>0?todayStr():""; n++; } });
-  scheduleSave(); render(); toast(`${n}件の単語の暗記度を変更しました`);
-}
-function bulkDelete(){
-  const wb = currentWordbook();
-  const check = parseNoSpec($("#bulk-spec").value);
-  if(!check){ toast("対象の単語Noを入力してください"); return; }
-  const before = wb.words.length;
-  wb.words = wb.words.filter(w=>!check(w.no));
-  const diff = before - wb.words.length;
-  scheduleSave(); render(); toast(`${diff}件の単語を削除しました`);
-}
-
-/* ============================================================
-   テスト機能
-   ============================================================ */
-if(!state.testConfig){
-  state.testConfig = { spec:"", mode:"choice", levels:[0,1,2,3,4,5,6], order:"seq", qCount:10 };
-}
-function renderTestTab(wb){
-  if(state.testSession){ return renderTestSession(wb); }
-  const cfg = state.testConfig;
-  return `
-  <div class="card" style="padding:22px;max-width:720px;margin:0 auto;">
-    <h3 style="font-size:16px;margin-bottom:18px;"><i class="fa-solid fa-sliders"></i> テスト設定</h3>
-    <div class="test-setup-grid">
-      <div class="opt-group card">
-        <h4><i class="fa-solid fa-list-ol"></i> 出題範囲(単語No)</h4>
-        <div class="field"><input id="tc-spec" placeholder="例: 1-20 または 空欄で全範囲" value="${esc(cfg.spec)}"></div>
-      </div>
-      <div class="opt-group card">
-        <h4><i class="fa-solid fa-layer-group"></i> 対象暗記度</h4>
-        <div class="level-pill-row">
-          ${[0,1,2,3,4,5,6].map(v=>{
-            const sel = cfg.levels.includes(v);
-            return `<span class="level-pill ${sel?'selected':''}" style="background:${levelInfo(v).css};color:${levelInfo(v).text}" onclick="toggleTestLevel(${v})">${levelInfo(v).label}</span>`;
-          }).join("")}
-        </div>
-      </div>
-    </div>
-    
-    <div class="opt-group card" style="margin-top:14px;">
-      <h4><i class="fa-solid fa-cubes"></i> テスト形式</h4>
-      <div class="choice-row">
-        <div class="choice-pill ${cfg.mode==='card'?'selected':''}" onclick="state.testConfig.mode='card'; render();">単語カード</div>
-        <div class="choice-pill ${cfg.mode==='choice'?'selected':''}" onclick="state.testConfig.mode='choice'; render();">4択クイズ</div>
-        <div class="choice-pill ${cfg.mode==='input'?'selected':''}" onclick="state.testConfig.mode='input'; render();">キーボード入力</div>
-      </div>
-    </div>
-
-    <div class="opt-group card" style="margin-top:14px;">
-      <h4><i class="fa-solid fa-shuffle"></i> 出題順・問題数</h4>
-      <div style="display:flex;gap:14px;flex-wrap:wrap;">
-        <div class="field" style="flex:1;"><label>順序</label>
-          <select onchange="state.testConfig.order=this.value;">
-            <option value="seq" ${cfg.order==='seq'?'selected':''}>番号順</option>
-            <option value="rand" ${cfg.order==='rand'?'selected':''}>ランダム</option>
-          </select>
-        </div>
-        <div class="field" style="flex:1;"><label>出題上限</label>
-          <input type="number" value="${cfg.qCount}" oninput="state.testConfig.qCount=Number(this.value)||10">
-        </div>
-      </div>
-    </div>
-
-    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;margin-top:20px;" onclick="startTest()"><i class="fa-solid fa-play"></i> テストを開始する</button>
-  </div>
-  `;
-}
-function toggleTestLevel(v){
-  const idx = state.testConfig.levels.indexOf(v);
-  if(idx>=0) state.testConfig.levels.splice(idx,1); else state.testConfig.levels.push(v);
-  render();
-}
-function startTest(){
-  const wb = currentWordbook();
-  const cfg = state.testConfig;
-  cfg.spec = $("#tc-spec").value;
-  const check = parseNoSpec(cfg.spec);
-  let pool = (wb.words||[]).filter(w=>{
-    if(check && !check(w.no)) return false;
-    if(!cfg.levels.includes(w.level)) return false;
-    return true;
-  });
-  if(pool.length===0){ toast("条件に合う単語がありません"); return; }
-  if(cfg.order==="rand"){ pool = pool.sort(()=>Math.random()-0.5); }
-  else{ pool.sort((a,b)=>a.no-b.no); }
-  pool = pool.slice(0, cfg.qCount);
-
-  state.testSession = {
-    mode: cfg.mode,
-    questions: pool,
-    currentIndex: 0,
-    answers: [],
-    showCardBack: false,
-    startTime: Date.now(),
-    ended: false
-  };
-  render();
-}
-
-function renderTestSession(wb){
-  const sess = state.testSession;
-  if(sess.ended){ return renderTestResult(wb); }
-  const q = sess.questions[sess.currentIndex];
-  const total = sess.questions.length;
-  const pct = Math.round(((sess.currentIndex)/total)*100);
-
-  return `
-  <div style="max-width:680px;margin:0 auto;">
-    <div class="test-topbar">
-      <button class="btn-ghost" onclick="openModal('abort-test-confirm')"><i class="fa-solid fa-xmark"></i> 中断</button>
-      <div>${sess.currentIndex+1} / ${total} 問</div>
-    </div>
-    <div class="test-progress-bar"><div class="fill" style="width:${pct}%;"></div></div>
-
-    <div class="card test-card" style="margin-top:16px;">
-      <div class="test-word-no">単語 No.${pad4(q.no)}</div>
-      <div class="test-word-main">${esc(q.word)}</div>
-
-      ${sess.mode === 'card' ? renderCardModeView(q, sess) : ''}
-      ${sess.mode === 'choice' ? renderChoiceModeView(q, wb) : ''}
-      ${sess.mode === 'input' ? renderInputModeView(q) : ''}
-    </div>
-  </div>
-  `;
-}
-function renderCardModeView(q, sess){
-  if(!sess.showCardBack){
-    return `<button class="btn btn-outline flip-btn" onclick="state.testSession.showCardBack=true; render();"><i class="fa-solid fa-rotate"></i> 答えを表示</button>`;
-  }
-  return `
-    <div style="font-size:22px;color:var(--color-primary-ink);font-weight:700;">${esc(q.meaning)}</div>
-    <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;">
-      <button class="btn btn-danger" onclick="answerCard(false)"><i class="fa-solid fa-xmark"></i> 覚えてない (Lv+1)</button>
-      <button class="btn btn-primary" onclick="answerCard(true)"><i class="fa-solid fa-check"></i> 覚えた (Lv-1)</button>
-    </div>
-  `;
-}
-function answerCard(isCorrect){
-  const sess = state.testSession;
-  const q = sess.questions[sess.currentIndex];
-  sess.answers.push({ word: q, isCorrect });
-  nextQuestion();
-}
-function renderChoiceModeView(q, wb){
-  if(!state._testChoices || state._testChoicesQ !== q.no){
-    const others = (wb.words||[]).filter(w=>w.no!==q.no);
-    const shuffled = others.sort(()=>Math.random()-0.5).slice(0,3);
-    const choices = [q, ...shuffled].sort(()=>Math.random()-0.5);
-    state._testChoices = choices; state._testChoicesQ = q.no;
-  }
-  return `
-  <div class="test-choices">
-    ${state._testChoices.map(c=>`
-      <button class="test-choice-btn" onclick="answerChoice(${c.no === q.no})">${esc(c.meaning)}</button>
-    `).join("")}
-  </div>
-  `;
-}
-function answerChoice(isCorrect){
-  const sess = state.testSession;
-  const q = sess.questions[sess.currentIndex];
-  sess.answers.push({ word: q, isCorrect });
-  state._testChoices = null;
-  nextQuestion();
-}
-function renderInputModeView(q){
-  return `
-  <div class="test-input-row">
-    <input id="test-user-input" placeholder="意味または単語を入力..." onkeydown="if(event.key==='Enter') answerInput('${esc(q.meaning)}')">
-    <button class="btn btn-primary" onclick="answerInput('${esc(q.meaning)}')">回答</button>
-  </div>
-  `;
-}
-function answerInput(correctMeaning){
-  const val = ($("#test-user-input")?.value||"").trim().toLowerCase();
-  const answers = splitAnswers(correctMeaning).map(a=>a.toLowerCase());
-  const isCorrect = answers.includes(val);
-  const sess = state.testSession;
-  const q = sess.questions[sess.currentIndex];
-  sess.answers.push({ word: q, isCorrect });
-  nextQuestion();
-}
-function nextQuestion(){
-  const sess = state.testSession;
-  sess.showCardBack = false;
-  sess.currentIndex++;
-  if(sess.currentIndex >= sess.questions.length){
-    sess.ended = true;
-    applyTestResults();
-  }
-  render();
-}
-function applyTestResults(){
-  const sess = state.testSession;
-  const wb = currentWordbook();
-  sess.answers.forEach(a=>{
-    const w = wb.words.find(x=>x.no===a.word.no);
-    if(w){
-      if(a.isCorrect){ w.level = Math.max(1, w.level - 1); }
-      else{ w.level = Math.min(5, w.level === 0 ? 3 : w.level + 1); }
-      w.date = todayStr();
+    function resetWordLvl(wordNo) {
+      const item = currentDeck.words.find(w => w.no === wordNo);
+      if (item) {
+        item.lvl = 0;
+        item.date = null;
+        renderWordTable();
+        renderAnalytics();
+      }
     }
-  });
-  scheduleSave();
-}
-function abortTestConfirmed(){
-  state.testSession = null;
-  closeModal();
-  render();
-}
-function renderTestResult(wb){
-  const sess = state.testSession;
-  const correctCount = sess.answers.filter(a=>a.isCorrect).length;
-  const total = sess.answers.length;
-  const scorePct = Math.round((correctCount/total)*100);
 
-  return `
-  <div class="card" style="max-width:680px;margin:0 auto;padding:24px;">
-    <div class="result-summary">
-      <h2>テスト結果</h2>
-      <div class="result-score" style="margin-top:16px;">${scorePct}%</div>
-      <p style="color:var(--color-text-sub);">${total}問中 ${correctCount}問 正解</p>
-    </div>
+    function renderAnalytics() {
+      const bar = document.getElementById('analyticsGraphBar');
+      const legend = document.getElementById('analyticsLegend');
+      bar.innerHTML = '';
+      legend.innerHTML = '';
 
-    <div style="margin-top:20px;">
-      <h4 style="margin-bottom:10px;">回答一覧</h4>
-      ${sess.answers.map(a=>`
-        <div class="qa-row">
-          <div>
-            <span class="qtext">${esc(a.word.word)}</span>
-            <span style="color:var(--color-text-sub);margin-left:8px;">${esc(a.word.meaning)}</span>
-          </div>
-          <span class="${a.isCorrect?'badge-correct':'badge-wrong'}">${a.isCorrect?'○ 正解':'× 不正解'}</span>
-        </div>
-      `).join("")}
-    </div>
+      const total = currentDeck.words.length;
+      if (total === 0) return;
 
-    <div class="result-actions">
-      <button class="btn btn-primary" onclick="state.testSession=null; render();">テスト選択へ戻る</button>
-    </div>
-  </div>
-  `;
-}
+      const counts = [0, 0, 0, 0, 0, 0, 0]; // L0 - L6
+      currentDeck.words.forEach(w => counts[w.lvl]++);
 
-/* ============================================================
-   共有・アカウント タブ
-   ============================================================ */
-function renderShareTab(wb){
-  return `
-  <div class="card share-panel" style="max-width:600px;margin:0 auto;">
-    <h3><i class="fa-solid fa-share-nodes"></i> 単語帳の共有</h3>
-    <p class="hint">この単語帳の共有コードを発行して他のユーザーに送信できます。</p>
-    <div class="share-code-box">
-      <code>YNQ-${wb.id.slice(0,6).toUpperCase()}</code>
-      <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('YNQ-${wb.id.slice(0,6).toUpperCase()}'); toast('コピーしました');">コピー</button>
-    </div>
-  </div>
-  `;
-}
-function renderAccountTabInner(isModal){
-  const p = state.profile || {username:"user", iconColor:"#4A8FE7"};
-  return `
-  <div>
-    <div class="profile-head">
-      <div class="avatar-lg" style="background:${p.iconColor}">${initials(p.username)}</div>
-      <div>
-        <h2>${esc(p.username)}</h2>
-        <span class="hint">${esc(state.authUser?.email||"")}</span>
-      </div>
-    </div>
-    <div class="stat-grid">
-      <div class="stat"><b>${state.data?.folders?.length||0}</b>フォルダー</div>
-      <div class="stat"><b>${(state.data?.folders||[]).reduce((s,f)=>s+(f.wordbooks||[]).length,0)}</b>単語帳</div>
-    </div>
-    ${isModal ? `<div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">閉じる</button></div>` : ""}
-  </div>
-  `;
-}
-</script>
+      // L1~L6, L0 の順で並べる要件対応
+      const order = [1, 2, 3, 4, 5, 6, 0];
+      order.forEach(lvl => {
+        const count = counts[lvl];
+        const pct = Math.round((count / total) * 100);
+        if (pct > 0) {
+          const seg = document.createElement('div');
+          seg.className = `bar-segment lvl-${lvl}`;
+          seg.style.width = `${pct}%`;
+          bar.appendChild(seg);
+        }
+        legend.innerHTML += `<span><span class="badge-lvl lvl-${lvl}">L${lvl}</span> ${count}件 (${pct}%)</span>`;
+      });
+    }
+
+    /* ==========================================================================
+       単語追加 (手動 & CSV)
+       ========================================================================== */
+    document.getElementById('btnAddWordSingle').addEventListener('click', () => {
+      const word = document.getElementById('addWordText').value;
+      const def = document.getElementById('addDefText').value;
+      const lvl = parseInt(document.getElementById('addLvlSelect').value);
+
+      if (!word || !def) return;
+
+      const newNo = currentDeck.words.length + 1;
+      currentDeck.words.push({
+        no: newNo,
+        word: word,
+        def: def,
+        lvl: lvl,
+        date: lvl > 0 ? new Date().toLocaleDateString() : null
+      });
+
+      document.getElementById('addWordText').value = '';
+      document.getElementById('addDefText').value = '';
+      renderWordTable();
+      renderAnalytics();
+      alert("単語を追加しました");
+    });
+
+    // CSV インポート (2行目から読み込み & 暗記度判別)
+    document.getElementById('csvFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const lines = evt.target.result.split('\n');
+        // 2行目から解析
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const cols = line.split(',');
+          if (cols.length >= 3) {
+            const word = cols[1]?.trim();
+            const def = cols[2]?.trim();
+            const lvl = parseInt(cols[3]?.trim()) || 0;
+            if (word && def) {
+              currentDeck.words.push({
+                no: currentDeck.words.length + 1,
+                word: word,
+                def: def,
+                lvl: lvl >= 0 && lvl <= 6 ? lvl : 0,
+                date: lvl > 0 ? new Date().toLocaleDateString() : null
+              });
+            }
+          }
+        }
+        renderWordTable();
+        renderAnalytics();
+        alert("CSVの読み込みが完了しました");
+      };
+      reader.readAsText(file);
+    });
+
+    /* ==========================================================================
+       テスト機能
+       ========================================================================== */
+    let testQuestions = [];
+    let currentTestIdx = 0;
+
+    document.getElementById('btnStartTest').addEventListener('click', () => {
+      testQuestions = [...currentDeck.words];
+      if (testQuestions.length === 0) {
+        alert("テストできる単語がありません。");
+        return;
+      }
+      currentTestIdx = 0;
+      document.getElementById('testSetupConfig').style.display = 'none';
+      document.getElementById('testRunner').style.display = 'block';
+      showNextQuestion();
+    });
+
+    function showNextQuestion() {
+      if (currentTestIdx >= testQuestions.length) {
+        alert("テスト終了です！");
+        document.getElementById('testSetupConfig').style.display = 'block';
+        document.getElementById('testRunner').style.display = 'none';
+        return;
+      }
+
+      const q = testQuestions[currentTestIdx];
+      document.getElementById('testProgressText').innerText = `第 ${currentTestIdx + 1} 問 / 進捗 ${Math.round((currentTestIdx / testQuestions.length) * 100)}%`;
+      document.getElementById('testQuestionNo').innerText = `No.${String(q.no).padStart(4, '0')}`;
+      document.getElementById('testQuestionText').innerText = q.word;
+      document.getElementById('testAnswerText').innerText = q.def;
+      document.getElementById('testAnswerBlock').style.display = 'none';
+      document.getElementById('btnShowAnswer').style.display = 'inline-block';
+    }
+
+    document.getElementById('btnShowAnswer').addEventListener('click', () => {
+      document.getElementById('btnShowAnswer').style.display = 'none';
+      document.getElementById('testAnswerBlock').style.display = 'block';
+    });
+
+    const handleAnswer = (isCorrect) => {
+      const q = testQuestions[currentTestIdx];
+      // 正解なら Level を下げ、不正解なら上げる（簡易判定）
+      if (isCorrect) {
+        if (q.lvl > 1) q.lvl--;
+      } else {
+        if (q.lvl < 5) q.lvl++;
+      }
+      q.date = new Date().toLocaleDateString();
+      currentTestIdx++;
+      showNextQuestion();
+      renderWordTable();
+      renderAnalytics();
+    };
+
+    document.getElementById('btnAnsCorrect').addEventListener('click', () => handleAnswer(true));
+    document.getElementById('btnAnsWrong').addEventListener('click', () => handleAnswer(false));
+
+    document.getElementById('btnAbortTest').addEventListener('click', () => {
+      if (confirm("テスト内容が記録されませんが、中断しますか？")) {
+        document.getElementById('testSetupConfig').style.display = 'block';
+        document.getElementById('testRunner').style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
